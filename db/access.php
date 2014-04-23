@@ -1,8 +1,9 @@
 <?php
 
-/* Define cabilities  (permissions)
+/* Define cabilities  (permissions) */
 $capabilities = array(
 
+    /*
     'block/timetracker:manageworkers' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_BLOCK,
@@ -67,6 +68,7 @@ $capabilities = array(
             'guest' => CAP_PREVENT
         )
     ),
+    */
 
     'block/timetracker:addinstance' => array(
         'riskbitmask' => RISK_SPAM | RISK_XSS,
