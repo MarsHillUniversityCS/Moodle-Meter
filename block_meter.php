@@ -23,7 +23,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL
  */
 
-require_once('lib.php');
+//require_once('lib.php');
+require_once($CFG->dirroot.'/blocks/meter/lib.php');
 
 class block_meter extends block_base {
 
@@ -36,7 +37,7 @@ class block_meter extends block_base {
 
     function get_content() {
         //global $CFG, $DB, $USER, $OUTPUT, $COURSE;
-
+        global $COURSE;
         if($this->content !== NULL){
             return $this->content;
         }
@@ -44,7 +45,19 @@ class block_meter extends block_base {
         $this->content = new stdClass;
 
         $this->content->text    .= '<h4>The Moodle Meter Block</h4>';
-        $this->content->text    .= '<br />';
+        $this->content->text    .= '<br />';//.$COURSE->id;
+
+        //do_stats_run($COURSE->id);
+        if(has_capability('moodle/grade:viewall', $this->context)){
+            //$this->content->text    .= '<br />You are a teacher';
+            $students = get_student_stats($COURSE->id);
+            foreach ($students as $student){
+                $this->content->text .= $student->lastname.', '.$student->firstname.
+                    ' - Level '.$student->level.'<br />';
+            }
+        } else if(has_capability('mod/assignment:submit', $this->context)){
+            $this->content->text    .= '<br />You are a student';
+        }
 
         return $this->content;
     }
