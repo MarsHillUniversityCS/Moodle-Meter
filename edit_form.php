@@ -27,6 +27,25 @@
 class block_meter_edit_form extends block_edit_form {
     protected function specific_definition($mform) {
         global $CFG, $DB, $USER, $COURSE;
+        // Fields for editing block contents.
+        $mform->addElement('header', 'configheader',
+            get_string('configheader','block_meter'));
+
+        foreach(range(1,6) as $i){
+
+            $mform->addElement('text','config_tier'.$i.'_weight',
+                get_string('tier'.$i.'weight','block_meter'));
+
+            $mform->setType('config_tier'.$i.'_weight', PARAM_INT);
+            $mform->setDefault('config_tier'.$i.'_weight', 35-(($i-1)*5));
+        }
+            
+        $mform->addElement('text','config_default_weight',
+            get_string('defaultweight','block_meter'));
+
+        $mform->setType('config_default_weight', PARAM_INT);
+        $mform->setDefault('config_default_weight', 1);
+
         
     }
 
