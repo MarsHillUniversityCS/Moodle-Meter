@@ -70,7 +70,7 @@ $capabilities = array(
     ),
     */
 
-    'block/timetracker:addinstance' => array(
+    'block/meter:addinstance' => array(
         'riskbitmask' => RISK_SPAM | RISK_XSS,
 
         'captype' => 'write',
@@ -84,4 +84,3 @@ $capabilities = array(
     )
 
 );
-*/
