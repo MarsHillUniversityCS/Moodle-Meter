@@ -26,8 +26,52 @@ $string['pluginname'] = 'Meter';
 $string['blocktitle'] = 'Moodle Meter';
 
 //Capabilities - descriptive names. Setup in db/access.php
-//$string['meter:managetransactions'] = 'Manage the transactions for a category';
-//$string['meter:viewtransactions'] = 'View the transactions for a category';
-//$string['meter:addinstance'] = 'Add block to course';
+$string['meter:addinstance'] = 'Add meter to course';
+
+//config
+$string['configheader']     = 'Set the default weights for each category of Moodle activity';
+$string['tier1weight']      = 'Category 1 weight (assignment submissions/resource views)';
+$string['tier2weight']      = 'Category 2 weight (other assignment activity)';
+$string['tier3weight']      = 'Category 3 weight (quiz activity)';
+$string['tier4weight']      = 'Category 4 weight (??)';
+$string['tier5weight']      = 'Category 5 weight (blog or book module activity)';
+$string['tier6weight']      = 'Category 6 weight (??)';
+$string['defaultweight']    = 'Weight for all other activities';
+$string['noconfigpresent']  = 'Please configure the Meter block before use';
+
+//Graph
+$string['viewgraph']    = 'View your activity graph';
+$string['viewallusers'] = 'View the activity graph of all users';
+$string['graphdesc']    =   
+                            'The graph shows a user\'s activity level over time.'.
+                            '<ul>'.
+                            '<li>The area between -3 and -2 represents a Level 1 user.'.
+                            ' A Level 1 user has significantly less Moodle interactivity than '.
+                            'that of their peers in this course.</li>'.
+                            '<li>The area between -2 and -1 represents a Level 2 user.'.
+                            ' A Level 2 user has slightly less Moodle interactivity than '.
+                            'that of their peers in this course.</li>'.
+                            '<li>The area between -1 and 1 represents a Level 3 user.'.
+                            ' A Level 3 user has an average amount of Moodle interactivity compared '.
+                            'to that of their peers in this course.</li>'.
+                            '<li>The area between 1 and 2 represents a Level 4 user.'.
+                            ' A Level 4 user has slightly more Moodle interactivity than '.
+                            'that of their peers in this course.</li>'.
+                            '<li>The area between 2 and 3 represents a Level 5 user.'.
+                            ' A Level 5 user has significantly more Moodle interactivity than '.
+                            'that of their peers in this course.</li>'.
+                            '</ul>';
+
+//Levels
+$string['level1user'] = 'Your Moodle usage is significantly less than that of your peers'.
+                        ' in this course.';
+$string['level2user'] = 'Your Moodle usage is slightly less than that of your peers'.
+                        ' in this course.';
+$string['level3user'] = 'Your Moodle usage is about average compared to that of your peers'.
+                        ' in this course.';
+$string['level4user'] = 'Your Moodle usage is somewhat more than that of your peers'.
+                        ' in this course.';
+$string['level5user'] = 'Your Moodle usage is significantly more than that of your peers'.
+                        ' in this course.';
 
 
