@@ -187,29 +187,13 @@ function get_all_student_stats($courseid){
     if(!$students) return array();
     
     foreach($students as $student){
-            $level1 = 0;
-            $level2 = $stats->mean - (2 * $stats->stdv);
-            $level3 = $stats->mean - (1 * $stats->stdv);
-            $level4 = $stats->mean + (1 * $stats->stdv);
-            $level5 = $stats->mean + (2 * $stats->stdv);
-
-            if($student->score < $level2){
-                $student->level = 1;
-            } else if ($student->score < $level3){
-                $student->level = 2;
-            } else if ($student->score < $level4){
-                $student->level = 3;
-            } else if ($student->score < $level5){
-                $student->level = 4;
-            } else {
-                $student->level = 5;
-            }
+        $student->level = get_level($student->score, $stats->mean, $stats->stdv);
     }
     return $students;
 }
 
 /**
-* @return a student level given a user id and course id 
+* @return a student level given a user id and course id, null is student doesn't exist
 */
 function get_student_stats($userid, $courseid){
     global $DB, $CFG;
@@ -228,26 +212,31 @@ function get_student_stats($userid, $courseid){
     $student = $DB->get_record_sql($sql);
 
     if(!$student) return null;
-    
-    $level1 = 0;
-    $level2 = $stats->mean - (2 * $stats->stdv);
-    $level3 = $stats->mean - (1 * $stats->stdv);
-    $level4 = $stats->mean + (1 * $stats->stdv);
-    $level5 = $stats->mean + (2 * $stats->stdv);
+     
+    return get_level($student->score, $stats->mean, $stats->stdv);
+}
 
-    if($student->score < $level2){
-        $student->level = 1;
-    } else if ($student->score < $level3){
-        $student->level = 2;
-    } else if ($student->score < $level4){
-        $student->level = 3;
-    } else if ($student->score < $level5){
-        $student->level = 4;
+function get_level($score, $mean, $stdv){
+
+    $level1 = 0;
+    $level2 = $mean - (2 * $stdv);
+    $level3 = $mean - (1 * $stdv);
+    $level4 = $mean + (1 * $stdv);
+    $level5 = $mean + (2 * $stdv);
+
+    if($score < $level2){
+        $level = 1;
+    } else if ($score < $level3){
+        $level = 2;
+    } else if ($score < $level4){
+        $level = 3;
+    } else if ($score < $level5){
+        $level = 4;
     } else {
-        $student->level = 5;
+        $level = 5;
     }
-    
-    return $student->level;
+
+    return $level;
 }
 
 
