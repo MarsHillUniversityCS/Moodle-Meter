@@ -124,7 +124,7 @@ $chart->parameter['x_inner_padding']    = 10;
 $chart->parameter['y_inner_padding']    = 10;
 
 $chart->parameter['y_decimal_left']     = 1;
-$chart->parameter['y_axis_gridlines']   = 7;
+$chart->parameter['y_axis_gridlines']   = 13;
 $chart->parameter['y_axis_num_ticks']   = 6;
 $chart->parameter['y_min_left']         = -3;
 $chart->parameter['y_max_left']         = 3;
