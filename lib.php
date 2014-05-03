@@ -313,13 +313,19 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
     global $CFG, $DB; 
 
     if($deleteprev){
+
+        //what if the data isn't there?
+
         $stats = $DB->get_records('block_meter_stats', array('courseid'=>$courseid),'','id');
+        if($stats){ // no data yet
 
-        $sel = 'statsid in ('.  implode(',', array_keys($stats)).')';
+
+            $sel = 'statsid in ('.  implode(',', array_keys($stats)).')';
 
 
-        $DB->delete_records_select('block_meter_studentstats', $sel);
-        $DB->delete_records('block_meter_stats', array('courseid'=>$courseid));
+            $DB->delete_records_select('block_meter_studentstats', $sel);
+            $DB->delete_records('block_meter_stats', array('courseid'=>$courseid));
+        }
     }
 
     //they didn't provide a startime. Use the first log entry time - last log entry time
