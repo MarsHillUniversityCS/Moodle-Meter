@@ -67,6 +67,7 @@ function get_row_score($activity, $config){
     $tier6      = $config['tier6_weight']; //tier6 is not used. WHY? XXX TODO CARTER!!ier
     $default    = $config['default_weight'];
 
+    //XXX TODO CARTER FIX THIS!
     $score      = 0;
     if($activity->module=='assign'){
         if($activity->action=='submit' ||
@@ -96,6 +97,7 @@ function do_stats_run($courseid, $start = 0, $end = 0){
     $statsrun->courseid = $courseid;
     $statsrun->mean = 0;
     $statsrun->stdv = 0;
+
     if($end == 0)
         $statsrun->statstime = time();
     else 
@@ -178,7 +180,7 @@ function get_all_student_stats($courseid){
     $sql = 'SELECT stats.*,student.firstname, student.lastname, student.id as userid FROM '.
         $CFG->prefix.'block_meter_studentstats as stats, '.
         $CFG->prefix.'user as student WHERE student.id=stats.studentid AND '.
-        'stats.statsid='.$stats->id.' ORDER BY lastname,firstname';
+        'stats.statsid='.$stats->id.' ORDER BY zscore';
 
     $students = $DB->get_records_sql($sql);
 
