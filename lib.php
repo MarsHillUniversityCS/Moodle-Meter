@@ -91,6 +91,10 @@ function get_row_score($activity, $config){
 }
 
 function do_stats_run($courseid, $start = 0, $end = 0){
+    //Something to think about --
+    //if we find that there was no activity since the last run,
+    //Shouldn't we just not provide a stats entry?
+
     global $CFG, $DB;
     
     $statsrun = new stdClass();
@@ -187,7 +191,7 @@ function get_all_student_stats($courseid){
     if(!$students) return array();
     
     foreach($students as $student){
-        $student->level = get_level($student->score, $stats->mean, $stats->stdv);
+        $student->level = get_level($student->zscore);
     }
     return $students;
 }
@@ -213,10 +217,12 @@ function get_student_stats($userid, $courseid){
 
     if(!$student) return null;
      
-    return get_level($student->score, $stats->mean, $stats->stdv);
+    return get_level($student->zscore);
 }
 
-function get_level($score, $mean, $stdv){
+function get_level($zscore){
+
+    /* orig way
 
     $level1 = 0;
     $level2 = $mean - (2 * $stdv);
@@ -235,6 +241,14 @@ function get_level($score, $mean, $stdv){
     } else {
         $level = 5;
     }
+    */
+
+    //New way level three is from -0.5 to 0.5, etc.
+    if($zscore < -1.5)      $level = 1;
+    else if ($zscore < -.5) $level = 2;
+    else if ($zscore < .5)  $level = 3;
+    else if ($zscore < 1.5) $level = 4;
+    else                    $level = 5;
 
     return $level;
 }
