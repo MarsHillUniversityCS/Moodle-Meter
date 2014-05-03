@@ -291,6 +291,15 @@ function get_meter_config($courseid){
         $config[$key] = $conf->value;
     }
 
+    //load defaults, if they don't exist?
+    foreach(range(1,6) as $i){
+        if(!isset($config['tier'.$i.'_weight']))
+            $config['tier'.$i.'_weight'] = 35 - (($i-1) * 5);
+    }
+
+    if(!isset($config['default_weight']))
+        $config['default_weight'] = 1;
+
     return $config;
 }
 
@@ -308,9 +317,7 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
         $stats = $DB->get_records('block_meter_stats', array('courseid'=>$courseid),'','id');
         if($stats){ // no data yet
 
-
             $sel = 'statsid in ('.  implode(',', array_keys($stats)).')';
-
 
             $DB->delete_records_select('block_meter_studentstats', $sel);
             $DB->delete_records('block_meter_stats', array('courseid'=>$courseid));
@@ -322,6 +329,7 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
 
         $sql = 'SELECT time FROM '.$CFG->prefix.'log WHERE course='.$courseid.
             ' ORDER BY time ASC LIMIT 1';
+
         $first = $DB->get_record_sql($sql);
 
         $start = strtotime("midnight", $first->time);
