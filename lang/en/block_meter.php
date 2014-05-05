@@ -37,7 +37,7 @@ $string['tier4weight']      = 'Category 4 weight (??)';
 $string['tier5weight']      = 'Category 5 weight (blog or book module activity)';
 $string['tier6weight']      = 'Category 6 weight (??)';
 $string['defaultweight']    = 'Weight for all other activities';
-$string['configchanged']    = '**If you changed the category weights, the statistics will
+$string['configchanged']    = '**If you change the category weights, the statistics will
 need to re-calculate with the new settings. This process may take several minutes.';
 $string['noconfigpresent']  = 'Please configure the Meter block before use';
 
@@ -64,14 +64,14 @@ $string['graphdesc']    =   '<h3>Graph information</h3>
                             that of their peers in this course.</li>
                             </ul>';
 
-$string['statdesc']   =     '<h3>Statistics information</h3>'.
-                            '<ul>'.
-                            '<li><b>Mean</b> - The mean is the average of the student activity
+$string['statdesc']   =     '<h3>Statistics information</h3>
+                            <ul>
+                            <li><b>Mean</b> - The mean is the average of the student activity
                             scores. This is cumulative, meaning that the calculations are
                             done from the first day of student activity to the day listed
                             on the X axis. <br />The mean is shown by on the graph at y = 0. </li>'.
                             '<li><b>Standard deviation</b> - The standard deviation
-                            is a measure of how spread out the scores are from the mean
+                            is a measure of how spread out the scores are from the mean.
                             <br />
                             In a normal distribution,
                             <ul>
