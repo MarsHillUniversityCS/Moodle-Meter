@@ -37,30 +37,53 @@ $string['tier4weight']      = 'Category 4 weight (??)';
 $string['tier5weight']      = 'Category 5 weight (blog or book module activity)';
 $string['tier6weight']      = 'Category 6 weight (??)';
 $string['defaultweight']    = 'Weight for all other activities';
+$string['configchanged']    = '**If you changed the category weights, the statistics will
+need to re-calculate with the new settings. This process may take several minutes.';
 $string['noconfigpresent']  = 'Please configure the Meter block before use';
 
 //Graph
 $string['viewgraph']    = 'View your activity graph';
 $string['viewallusers'] = 'View the activity graph of all users';
-$string['graphdesc']    =   
-                            'The graph shows a user\'s activity level over time.'.
+$string['graphdesc']    =   '<h3>Graph information</h3>
+                            The graph shows a user\'s activity level over time.
+                            <ul>
+                            <li><b>Level 1</b> - The area between -3 and -1.5.
+                             A Level 1 user has significantly less Moodle activity than 
+                            that of their peers in this course.</li>
+                            <li><b>Level 2</b> - The area between -1.5 and -0.5.
+                             A Level 2 user has slightly less Moodle activity than 
+                            that of their peers in this course.</li>
+                            <li><b>Level 3</b> - The area between -0.5 and 0.5.
+                             A Level 3 user has an average amount of Moodle activity compared 
+                            to that of their peers in this course.</li>
+                            <li><b>Level 4</b> - The area between 0.5 and 1.5.
+                             A Level 4 user has slightly more Moodle activity than 
+                            that of their peers in this course.</li>
+                            <li><b>Level 5</b> - The area between 1.5 and 3.
+                             A Level 5 user has significantly more Moodle activity than 
+                            that of their peers in this course.</li>
+                            </ul>';
+
+$string['statdesc']   =     '<h3>Statistics information</h3>'.
                             '<ul>'.
-                            '<li>The area between -3 and -2 represents a Level 1 user.'.
-                            ' A Level 1 user has significantly less Moodle interactivity than '.
-                            'that of their peers in this course.</li>'.
-                            '<li>The area between -2 and -1 represents a Level 2 user.'.
-                            ' A Level 2 user has slightly less Moodle interactivity than '.
-                            'that of their peers in this course.</li>'.
-                            '<li>The area between -1 and 1 represents a Level 3 user.'.
-                            ' A Level 3 user has an average amount of Moodle interactivity compared '.
-                            'to that of their peers in this course.</li>'.
-                            '<li>The area between 1 and 2 represents a Level 4 user.'.
-                            ' A Level 4 user has slightly more Moodle interactivity than '.
-                            'that of their peers in this course.</li>'.
-                            '<li>The area between 2 and 3 represents a Level 5 user.'.
-                            ' A Level 5 user has significantly more Moodle interactivity than '.
-                            'that of their peers in this course.</li>'.
-                            '</ul>';
+                            '<li><b>Mean</b> - The mean is the average of the student activity
+                            scores. This is cumulative, meaning that the calculations are
+                            done from the first day of student activity to the day listed
+                            on the X axis. <br />The mean is shown by on the graph at y = 0. </li>'.
+                            '<li><b>Standard deviation</b> - The standard deviation
+                            is a measure of how spread out the scores are from the mean
+                            <br />
+                            In a normal distribution,
+                            <ul>
+                                <li>Roughly 68% lie within 1 standard deviation</li>
+                                <li>Roughly 95% lie within 2 standard deviations</li>
+                                <li>Roughly 99% lie within 3 standard deviations</li>
+                            </ul>
+                            The standard deviations are shown on the Y axis. </li>
+                            <li><b>Z-Score</b> - A student\'s z-score describes how many
+                            standard deviations their activity score is above (or below, if it\'s
+                            negative) the mean activity score.</li>
+                            </ul>';
 
 //Levels
 $string['level1user'] = 'Your Moodle usage is significantly less than that of your peers'.
