@@ -66,5 +66,6 @@ $imageurl = new moodle_url('/blocks/meter/graph.php', array('id'=>$courseid, 'us
 $graph = html_writer::empty_tag('img', array('src' => $imageurl, 'alt'=>'Moodle Meter Graph'));
 echo html_writer::tag('div', $graph, array('class' => 'graph'));
 echo get_string('graphdesc', 'block_meter');
+echo get_string('statdesc', 'block_meter');
 
 echo $OUTPUT->footer();
