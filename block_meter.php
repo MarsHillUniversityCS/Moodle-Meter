@@ -147,7 +147,10 @@ class block_meter extends block_base {
     */
     function instance_config_save($data, $nolongerused = false){
         parent::instance_config_save($data, $nolongerused);
+
         global $DB, $COURSE;
+        $config = get_meter_config($COURSE->id);
+        $hasChanged = false;
         foreach ($data as $name => $value){
 
             $rec = $DB->get_record('block_meter_config',
@@ -158,13 +161,25 @@ class block_meter extends block_base {
             $conf->value = $value;
             $conf->courseid= $COURSE->id;
 
+
             if($rec){
                 $conf->id = $rec->id;
+                if($config[$conf->name] != $conf->value) $hasChanged = true;
                 $DB->update_record('block_meter_config',$conf);
             } else {
                 $DB->insert_record('block_meter_config',$conf);
             }
 
+        }
+
+        //check to see if this 'update' needs to trigger a load_historical_data()
+        //load_historical_data() if it's the first time.
+        //only load_historical_data if config values have changed.
+        if($hasChanged){
+            //all new config - need to load historical data and discard old, and 
+            //load new data
+            error_log("Config has changed - running load_historical_data()");
+            load_historical_data($COURSE->id, 0, 0, true);
         }
     }
 
