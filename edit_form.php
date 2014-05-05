@@ -46,6 +46,10 @@ class block_meter_edit_form extends block_edit_form {
         $mform->setType('config_default_weight', PARAM_INT);
         $mform->setDefault('config_default_weight', 1);
 
+        $mform->addElement('html', 
+            '<span style="color: red;">'.get_string('configchanged',
+            'block_meter').'</span>');
+
         
     }
 
