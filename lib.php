@@ -91,9 +91,17 @@ function get_row_score($activity, $config){
 }
 
 function do_stats_run($courseid, $start = 0, $end = 0){
+
     //Something to think about --
     //if we find that there was no activity since the last run,
     //Shouldn't we just not provide a stats entry?
+    //XXX Carter, what do you think?
+
+    //TODO -- perhaps add a flag, 'has_started' to mdl_config - remove it when this 
+    //function is done.
+    //If cron encounters a 'has_started' flag, it would signify that a previous run
+    //has been interrupted, and needs to re-do the stats for this course.
+    //Thoughts?
 
     global $CFG, $DB;
     
@@ -107,7 +115,6 @@ function do_stats_run($courseid, $start = 0, $end = 0){
     else 
         $statsrun->statstime = $end;
 
-    $statsid = $DB->insert_record('block_meter_stats', $statsrun);
    
     //Gives all students enrolled in this course
     $context = get_context_instance(CONTEXT_COURSE, $courseid);
@@ -115,6 +122,26 @@ function do_stats_run($courseid, $start = 0, $end = 0){
 
     if(!$students)
         return;
+
+    //CARTER -- see the comment at the beginning of this function
+    //If we un-comment the below lines, it would skip days where
+    //there is NO student activity. What do you think?
+    //PRO: No long, flat lines
+    //CON: Dates aren't spaced evenly, which could be problematic
+    /*
+    $sql = 'SELECT statstime FROM '.$CFG->prefix.'block_meter_stats ORDER BY statstime DESC LIMIT 1';
+    $lastrun = $DB->get_record_sql($sql);
+    if($lastrun){
+        $numrecords = $DB->count_records_select('log', 'userid in
+            ('.implode(',',array_keys($students)).') '.
+            'AND time BETWEEN '.$lastrun->statstime.' AND '.$end, 
+            array('course'=>$courseid));
+
+        if($numrecords == 0) return;
+    }
+    */
+
+    $statsid = $DB->insert_record('block_meter_stats', $statsrun);
 
     $studentstatslist = array();
     foreach($students as $student){
@@ -300,6 +327,7 @@ function get_meter_config($courseid){
     global $DB;
     $config = array();
     $confs = $DB->get_records('block_meter_config', array('courseid'=>$courseid));
+
     foreach ($confs as $conf){
         $key = preg_replace('/block\_meter\_/', '', $conf->name);
         $config[$key] = $conf->value;
@@ -313,6 +341,7 @@ function get_meter_config($courseid){
 
     if(!isset($config['default_weight']))
         $config['default_weight'] = 1;
+
 
     return $config;
 }
@@ -341,6 +370,10 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
     //they didn't provide a startime. Use the first log entry time - last log entry time
     if($start == 0 || $start > time()) { 
 
+        //XXX shouldn't I look for the first log time of a student?
+        //TODO This only looks at the first access, which could be 
+        //long before any student (relevant) activity.
+
         $sql = 'SELECT time FROM '.$CFG->prefix.'log WHERE course='.$courseid.
             ' ORDER BY time ASC LIMIT 1';
 
@@ -366,8 +399,8 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
         $end = strtotime("+1 day", $end); //23:59:59
 
         //debug only
-        $format = '%m/%d/%y';
-        echo "Processed from ".userdate($start, $format).' to '.userdate($end, $format)."\n";
+        //$format = '%m/%d/%y';
+        //echo "Processed from ".userdate($start, $format).' to '.userdate($end, $format)."\n";
     }
 }
 
