@@ -48,7 +48,8 @@ class block_meter extends block_base {
                 '/course/view.php', array('id'=>$COURSE->id, 'sesskey'=>sesskey(),
                 'bui_editid'=>$this->instance->id));
             
-            $this->content->text .= $OUTPUT->action_link($configurl, get_string('noconfigpresent', 'block_meter'));
+            $this->content->text .= $OUTPUT->action_link($configurl, 
+                get_string('noconfigpresent', 'block_meter'));
 
             return $this->content->text;
 
@@ -83,23 +84,17 @@ class block_meter extends block_base {
             }
 
             $graphurl->remove_params('userid');
-            $this->content->text .= '<br /><p style="text-align: right;">'.$OUTPUT->action_link($graphurl, 
+            $this->content->text .= '<br /><p style="text-align: right;">'.
+                $OUTPUT->action_link($graphurl, 
                 get_string('viewallusers', 'block_meter')).'</p>';
 
         } else if(has_capability('mod/assignment:submit', $this->context)){
 
             $level = get_student_stats($USER->id, $COURSE->id);
-
-        
-            /*
-            $this->content->text .= 
-                html_writer::empty_tag('img', 
-                array('src' => $CFG->wwwroot.'/blocks/meter/pix/level'.$level.'.png',
-                    'alt'=>get_string('viewgraph', 'block_meter')));
-            */
-
-
             
+            //assume they're avg(3)? Bigger prob here; student doesn't exist.
+            if(!$level) $level = 3; 
+
             $graphurl->params(array('userid'=>$USER->id));
             $this->content->text .= $OUTPUT->action_icon($graphurl,
                         new pix_icon('level'.$level, get_string('viewgraph', 'block_meter'),
@@ -117,7 +112,7 @@ class block_meter extends block_base {
     }
     
     function has_config() {
-        return false;
+        return true;
     }
     
     function instance_allow_config() {
@@ -130,15 +125,55 @@ class block_meter extends block_base {
         $lastcron = $DB->get_field('block', 'lastcron', 
             array('name'=>'meter'));
 
-        if($lastcron == 0){
-            $yesterday = strtotime ("Yesterday 6am");
-            $DB->set_field('block', 'lastcron', $yesterday,
-                array('name'=>'meter'));
-            return;
+        $suffix='am';
+        $cronhourdisp = $CFG->block_meter_cronhour;
+
+        if($cronhourdisp > 12) $suffix='pm';
+        $cronhourdisp .= $suffix;
+        if($lastcron == 0){ //first time
+            $lastcron = strtotime ('Yesterday '.$cronhourdisp);
         }
 
-        //update cron to execute in the morning at 6am - ish
-        $DB->set_field('block', 'lastcron', strtotime("Today 6am"),
+
+        $timenow = time();
+        $crontime = usergetmidnight($timenow, $CFG->timezone) +
+            ($CFG->block_meter_cronhour * 3600);
+
+        if($lastcron < $crontime and $timenow > $crontime){
+
+            //find all of the courses.
+            $courses = $DB->get_records_select('block_meter_config', '', null, '',
+                'DISTINCT courseid');
+            
+            if(!$courses){
+                mtrace('No courses found on which to run activity meter statistics');
+            } else {
+                foreach($courses as $course){ 
+                    //a)    if dostatsrun flag in _config is set, delete the flag, and 
+                    //      call a load_historical_data()  
+                    //b)    call do_stats_run() or
+
+                    if($DB->record_exists('block_meter_config',
+                        array('courseid'=>$course->courseid))){
+                        mtrace('Incomplete do_stats_run for '.
+                            $course->courseid.'. Loading historical data.');
+                        
+                        mtrace('Loading historical stats for course id '.
+                            $course->courseid.'...');
+                        load_historical_data($course->courseid, 0, 0, true);
+                        mtrace('Done.');
+                    } else {
+                        mtrace('Doing stats run for course id '.
+                            $course->courseid.'...');
+                        do_stats_run($course->courseid);
+                        mtrace('Done.');
+                    }
+                }
+            }
+        }
+
+        //update lastcron
+        $DB->set_field('block', 'lastcron', strtotime('Today '.$cronhourdisp),
             array('name'=>'meter'));
     }
 
@@ -176,9 +211,7 @@ class block_meter extends block_base {
         //load_historical_data() if it's the first time.
         //only load_historical_data if config values have changed.
         if($hasChanged){
-            //all new config - need to load historical data and discard old, and 
-            //load new data
-            error_log("Config has changed - running load_historical_data()");
+            error_log("Meter: Config has changed - running load_historical_data()");
             load_historical_data($COURSE->id, 0, 0, true);
         }
     }
