@@ -355,11 +355,11 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
     if($start == 0 || $start > time()) { 
 
         $context = get_context_instance(CONTEXT_COURSE, $courseid);
-        $teacherids = get_enrolled_users($context, 'mod/assignment:grade',
+        $studentids = get_enrolled_users($context, 'mod/assignment:submit',
             0, 'u.id');
 
         $sql = 'SELECT time FROM '.$CFG->prefix.'log WHERE course='.$courseid.
-            ' AND userid NOT IN ('.implode(',', array_keys($teacherids)).')'.
+            ' AND userid IN ('.implode(',', array_keys($studentids)).')'.
             ' ORDER BY time ASC LIMIT 1';
 
         $first = $DB->get_record_sql($sql);
@@ -377,11 +377,11 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
     if($final == 0 || $start > $final){
 
         $context = get_context_instance(CONTEXT_COURSE, $courseid);
-        $teacherids = get_enrolled_users($context, 'mod/assignment:grade',
+        $studentids = get_enrolled_users($context, 'mod/assignment:submit',
             0, 'u.id');
 
         $sql = 'SELECT time FROM '.$CFG->prefix.'log WHERE course='.$courseid.
-            ' AND userid NOT IN ('.implode(',', array_keys($teacherids)).')'.
+            ' AND userid IN ('.implode(',', array_keys($studentids)).')'.
             ' ORDER BY time DESC LIMIT 1';
 
         $last = $DB->get_record_sql($sql);
@@ -390,14 +390,14 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
             return; //nothing to process
         }
 
+        $final = $last->time;
         if($start >= $final){
             $final = strtotime("midnight tomorrow", $start);
-        } else {
-            $final = $last->time;
         }
     }
 
-    error_log("final: ".userdate($final, '%m/%d/%y'));
+    error_log("start: ".userdate($start, '%m/%d/%y').' '.$start);
+    error_log("final: ".userdate($final, '%m/%d/%y').' '.$final);
 
     while($end < $final){ 
         do_stats_run($courseid, $start, $end); 
