@@ -85,7 +85,7 @@ if($isteacher && $userid == 0){
             'legend' => $studentlist[$sid]->lastname.', '.
                         $studentlist[$sid]->firstname);
         $j++;
-        if($j > sizeof($colorarray)){
+        if($j >= sizeof($colorarray)){
             $j = 0;
         }
     }
