@@ -202,6 +202,7 @@ class block_meter extends block_base {
                 if($config[$conf->name] != $conf->value) $hasChanged = true;
                 $DB->update_record('block_meter_config',$conf);
             } else {
+                $hasChanged = true;
                 $DB->insert_record('block_meter_config',$conf);
             }
 
