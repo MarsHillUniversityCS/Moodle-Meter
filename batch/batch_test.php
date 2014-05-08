@@ -7,6 +7,9 @@ require_once('../lib.php');
 
 global $DB, $USER, $CFG;
 
+echo strtotime("Yesterday 04am")."\n";
+
+/*
 $courseid = 7;
 $sql = 'SELECT id, statstime from '.$CFG->prefix.
     'block_meter_stats WHERE courseid='.$courseid.' ORDER BY statstime ASC';
@@ -41,3 +44,4 @@ foreach ($statentries as $stat){
 
 
 print_r($datalist);
+*/

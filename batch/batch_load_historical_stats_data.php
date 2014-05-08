@@ -6,3 +6,4 @@ require_once('../lib.php');
 
 
 load_historical_data(7, 0, 1388527171, true);
+//load_historical_data(8, 0, 1388527171, true);

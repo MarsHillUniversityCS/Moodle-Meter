@@ -30,16 +30,30 @@ $string['meter:addinstance'] = 'Add meter to course';
 
 //config
 $string['configheader']     = 'Set the default weights for each category of Moodle activity';
-$string['tier1weight']      = 'Category 1 weight (assignment submissions/resource views)';
-$string['tier2weight']      = 'Category 2 weight (other assignment activity)';
-$string['tier3weight']      = 'Category 3 weight (quiz activity)';
-$string['tier4weight']      = 'Category 4 weight (??)';
-$string['tier5weight']      = 'Category 5 weight (blog or book module activity)';
-$string['tier6weight']      = 'Category 6 weight (??)';
-$string['defaultweight']    = 'Weight for all other activities';
+$string['tier1']        = 'Category 1 weight';
+$string['tier1desc']    = '(assignment related activity)';
+$string['tier2']        = 'Category 2 weight';
+$string['tier2desc']    = '(quiz activity)';
+$string['tier3']        = 'Category 3 weight';
+$string['tier3desc']    = '(resource/page/URL/folder activity)';
+$string['tier4']        = 'Category 4 weight';
+$string['tier4desc']    = '(forum activity)';
+$string['tier5']        = 'Category 5 weight';
+$string['tier5desc']    = '(book/blog/wiki activity)';
+$string['tier6']        = 'Category 6 weight';
+$string['tier6desc']    = '(chat/choice/message activity)';
+$string['defaultweight']        = 'Weight for all other activities';
+$string['defaultweightdesc']    = 'Weight for any log activity for a course other than the above
+listed categories.';
+
 $string['configchanged']    = '**If you change the category weights, the statistics will
 need to re-calculate with the new settings. This process may take several minutes.';
 $string['noconfigpresent']  = 'Please configure the Meter block before use';
+
+//admin config
+$string['cronhour']     = 'Hour to calculate statistics'; 
+$string['cronhourdesc'] = 'The hour when the activity meter statistics should be calculated. This is an intensive process, and should be set to a time when the server load is minimal.';
+
 
 //Graph
 $string['viewgraph']    = 'View your activity graph';
@@ -69,7 +83,7 @@ $string['statdesc']   =     '<h3>Statistics information</h3>
                             <li><b>Mean</b> - The mean is the average of the student activity
                             scores. This is cumulative, meaning that the calculations are
                             done from the first day of student activity to the day listed
-                            on the X axis. <br />The mean is shown by on the graph at y = 0. </li>'.
+                            on the X axis. <br />The mean is shown on the graph at y = 0. </li>'.
                             '<li><b>Standard deviation</b> - The standard deviation
                             is a measure of how spread out the scores are from the mean.
                             <br />

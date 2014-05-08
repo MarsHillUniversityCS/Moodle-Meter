@@ -68,7 +68,7 @@ $chart->x_data = $time; //Set x-values with human readable times
 
 
 $datalist = $array3d[1];  //y-data array of students and their z-scores
-
+//error_log(print_r($datalist, true));
 
 $studentlist = get_enrolled_users($context, 'mod/assignment:submit');
 /**********************************************************************
@@ -83,8 +83,11 @@ if($isteacher && $userid == 0){
             array('colour' => $colorarray[$j],
             'line'   => 'brush',
             'legend' => $studentlist[$sid]->lastname.', '.
-                $studentlist[$sid]->firstname);
+                        $studentlist[$sid]->firstname);
         $j++;
+        if($j > sizeof($colorarray)){
+            $j = 0;
+        }
     }
 
     $chart->y_order = array_keys($datalist);
@@ -97,7 +100,7 @@ if($isteacher && $userid == 0){
         array('colour' => $colorarray[0],
         'line'   => 'brush',
         'legend' => $studentlist[$userid]->lastname.', '.
-            $studentlist[$userid]->firstname);
+                    $studentlist[$userid]->firstname);
 
     $chart->y_order = array(1);
 }
