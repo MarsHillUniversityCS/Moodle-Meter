@@ -33,7 +33,6 @@ function calculate_activity_score($userid, $courseid, $start = 0, $end = 0){
         $activities = $DB->get_records('log', array('course'=>$courseid, 'userid'=>$userid));
     } else {
         $sql = 'SELECT * FROM '.$CFG->prefix.'log WHERE course='.$courseid.
-
             ' AND userid='.$userid.' AND time BETWEEN '.$start.' AND '.$end;
         //echo $sql;
         $activities = $DB->get_records_sql($sql);
@@ -57,32 +56,34 @@ function calculate_activity_score($userid, $courseid, $start = 0, $end = 0){
 function get_row_score($activity, $config){
 
 
-    //what if activity or config are bad?
-    //do something.
-    $tier1      = $config['tier1_weight'];
-    $tier2      = $config['tier2_weight'];
-    $tier3      = $config['tier3_weight'];
-    $tier4      = $config['tier4_weight']; //tier4 is not used. WHY? XXX TODO CARTER!!
-    $tier5      = $config['tier5_weight'];
-    $tier6      = $config['tier6_weight']; //tier6 is not used. WHY? XXX TODO CARTER!!ier
+    $tier1      = $config['tier1_weight']; //assignments
+    $tier2      = $config['tier2_weight']; //quizzes
+    $tier3      = $config['tier3_weight']; //resources/pages/URLs/folders
+    $tier4      = $config['tier4_weight']; //forums
+    $tier5      = $config['tier5_weight']; //book/blog/wiki
+    $tier6      = $config['tier6_weight']; //chat/choice/message
     $default    = $config['default_weight'];
 
-    //XXX TODO CARTER FIX THIS!
     $score      = 0;
     if($activity->module=='assign'){
-        if($activity->action=='submit' ||
-           $activity->action=='submit for grading' ||
-           $activity->action=='view'){
-            $score += $tier1;
-        } else {
-            $score += $tier2; 
-        } 
-    } else if($activity->module=='blog' || $activity->module=='book'){
-            $score += $tier5;
+        $score += $tier1;
     } else if($activity->module=='quiz'){
-            $score += $tier3;
-    } else if($activity->module=='resource'){
-            $score += $tier1;
+        $score += $tier2;
+    } else if($activity->module=='resource' || 
+        $activity->module=='page' ||
+        $activity->module=='url' ||
+        $activity->module=='folder'){
+        $score += $tier3;
+    } else if($activity->module=='forum'){
+        $score += $tier4;
+    } else if($activity->module=='book' || 
+        $activity->module=='blog' ||
+        $activity->module=='wiki'){ 
+        $score += $tier5;
+    } else if($activity->module=='chat' || 
+        $activity->module=='choice' ||
+        $activity->module=='message'){ 
+        $score += $tier6;
     } else{
         $score += $default;
     }
@@ -91,17 +92,23 @@ function get_row_score($activity, $config){
 }
 
 function do_stats_run($courseid, $start = 0, $end = 0){
-
-    //Something to think about --
-    //if we find that there was no activity since the last run,
-    //Shouldn't we just not provide a stats entry?
-    //XXX Carter, what do you think?
-
-    //TODO -- perhaps add a flag, 'has_started' to mdl_config - remove it when this 
+    global $DB;
+    //Add a flag, 'has_started' to mdl_config - remove it when this 
     //function is done.
     //If cron encounters a 'has_started' flag, it would signify that a previous run
     //has been interrupted, and needs to re-do the stats for this course.
     //Thoughts?
+
+    $jobflag = new stdClass();
+    $jobflag->courseid  = $courseid;
+    $jobflag->name      = 'dostatsrun';
+    $jobflag->value     = time();
+
+    $jobflag->id        = $DB->insert_record('block_meter_config', $jobflag);
+
+    if(!$jobflag->id) {
+        error_log("Error setting do_stats_run started flag");
+    }
 
     global $CFG, $DB;
     
@@ -123,24 +130,6 @@ function do_stats_run($courseid, $start = 0, $end = 0){
     if(!$students)
         return;
 
-    //CARTER -- see the comment at the beginning of this function
-    //If we un-comment the below lines, it would skip days where
-    //there is NO student activity. What do you think?
-    //PRO: No long, flat lines
-    //CON: Dates aren't spaced evenly, which could be problematic
-    /*
-    $sql = 'SELECT statstime FROM '.$CFG->prefix.'block_meter_stats ORDER BY statstime DESC LIMIT 1';
-    $lastrun = $DB->get_record_sql($sql);
-    if($lastrun){
-        $numrecords = $DB->count_records_select('log', 'userid in
-            ('.implode(',',array_keys($students)).') '.
-            'AND time BETWEEN '.$lastrun->statstime.' AND '.$end, 
-            array('course'=>$courseid));
-
-        if($numrecords == 0) return;
-    }
-    */
-
     $statsid = $DB->insert_record('block_meter_stats', $statsrun);
 
     $studentstatslist = array();
@@ -153,14 +142,16 @@ function do_stats_run($courseid, $start = 0, $end = 0){
 
         $resultid = $DB->insert_record('block_meter_studentstats', $studentstats);
         if(!$resultid)
-            error_log ('Failed to intert student stats for course '.$courseid.' and student '.$student->id);
+            error_log ('Failed to intert student stats for course '.
+                $courseid.' and student '.$student->id);
         $studentstats->id = $resultid;
         $studentstatslist[] = $studentstats;
     }
 
 
     
-    $sql = 'SELECT avg(score) avg, std(score) std  FROM '.$CFG->prefix.'block_meter_studentstats WHERE statsid='.$statsid;
+    $sql = 'SELECT avg(score) avg, std(score) std  FROM '.
+        $CFG->prefix.'block_meter_studentstats WHERE statsid='.$statsid;
 
     $math = $DB->get_record_sql($sql);
     if(!$math){
@@ -190,6 +181,10 @@ function do_stats_run($courseid, $start = 0, $end = 0){
             error_log("Error updating student w/id: ".$student->studentid);
         }
     }
+
+
+    //remove the flag
+    $DB->delete_records('block_meter_config', array('id'=>$jobflag->id));
 
     return;
 }
@@ -224,7 +219,7 @@ function get_all_student_stats($courseid){
 }
 
 /**
-* @return a student level given a user id and course id, null is student doesn't exist
+* @return a student level given a user id and course id, null if student doesn't exist
 */
 function get_student_stats($userid, $courseid){
     global $DB, $CFG;
@@ -249,28 +244,7 @@ function get_student_stats($userid, $courseid){
 
 function get_level($zscore){
 
-    /* orig way
-
-    $level1 = 0;
-    $level2 = $mean - (2 * $stdv);
-    $level3 = $mean - (1 * $stdv);
-    $level4 = $mean + (1 * $stdv);
-    $level5 = $mean + (2 * $stdv);
-
-    if($score < $level2){
-        $level = 1;
-    } else if ($score < $level3){
-        $level = 2;
-    } else if ($score < $level4){
-        $level = 3;
-    } else if ($score < $level5){
-        $level = 4;
-    } else {
-        $level = 5;
-    }
-    */
-
-    //New way level three is from -0.5 to 0.5, etc.
+    //New way - level three is from -0.5 to 0.5, etc.
     if($zscore < -1.5)      $level = 1;
     else if ($zscore < -.5) $level = 2;
     else if ($zscore < .5)  $level = 3;
@@ -285,13 +259,10 @@ function get_graph_data($courseid){
 
     global $DB, $USER, $CFG;
 
-    //$sql = 'SELECT id, statstime from '.$CFG->prefix.
-    //    'block_meter_stats WHERE courseid='.$courseid.' ORDER BY statstime ASC';
     $sql = 'SELECT id, statstime from '.$CFG->prefix.
         'block_meter_stats WHERE courseid='.$courseid.' ORDER BY statstime ASC';
     $statsruns = $DB->get_records_sql($sql);
     
-    //print_r(array_keys($statsruns));
     $statsidlist =  implode(',', array_keys($statsruns));
      
     $sql = 'SELECT stats.id, stats.studentid, stats.zscore FROM '.
@@ -333,16 +304,31 @@ function get_meter_config($courseid){
         $config[$key] = $conf->value;
     }
 
+    $globalconf = get_global_config();
+
     //load defaults, if they don't exist?
     foreach(range(1,6) as $i){
         if(!isset($config['tier'.$i.'_weight']))
-            $config['tier'.$i.'_weight'] = 35 - (($i-1) * 5);
+            $config['tier'.$i.'_weight'] = $globalconf['tier'.$i.'_weight'];
     }
 
     if(!isset($config['default_weight']))
-        $config['default_weight'] = 1;
+        $config['default_weight'] = $globalconf['default_weight'];
 
 
+    return $config;
+}
+
+function get_global_config(){
+    global $DB;
+    $config = array();
+    $confs = $DB->get_records_select('config', 'name like \'block_meter%\'');
+
+    foreach ($confs as $conf){
+        $key = preg_replace('/block\_meter\_/', '', $conf->name);
+        $config[$key] = $conf->value;
+    }
+    //error_log(print_r($config, true));
     return $config;
 }
 
@@ -354,12 +340,10 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
     global $CFG, $DB; 
 
     if($deleteprev){
-
         //what if the data isn't there?
 
         $stats = $DB->get_records('block_meter_stats', array('courseid'=>$courseid),'','id');
-        if($stats){ // no data yet
-
+        if($stats){ // has some data
             $sel = 'statsid in ('.  implode(',', array_keys($stats)).')';
 
             $DB->delete_records_select('block_meter_studentstats', $sel);
@@ -370,37 +354,59 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
     //they didn't provide a startime. Use the first log entry time - last log entry time
     if($start == 0 || $start > time()) { 
 
-        //XXX shouldn't I look for the first log time of a student?
-        //TODO This only looks at the first access, which could be 
-        //long before any student (relevant) activity.
+        $context = get_context_instance(CONTEXT_COURSE, $courseid);
+        $teacherids = get_enrolled_users($context, 'mod/assignment:grade',
+            0, 'u.id');
 
         $sql = 'SELECT time FROM '.$CFG->prefix.'log WHERE course='.$courseid.
+            ' AND userid NOT IN ('.implode(',', array_keys($teacherids)).')'.
             ' ORDER BY time ASC LIMIT 1';
 
         $first = $DB->get_record_sql($sql);
+
+        if(!$first){
+            return; //nothing to process
+        }
 
         $start = strtotime("midnight", $first->time);
         $end = strtotime("+1 day", $start);
 
     }
 
-    //they didn't say when to stop - stop previous midnight
+    //they didn't say when to stop - stop last day of student activity
     if($final == 0 || $start > $final){
-        $final = strtotime("midnight");
+
+        $context = get_context_instance(CONTEXT_COURSE, $courseid);
+        $teacherids = get_enrolled_users($context, 'mod/assignment:grade',
+            0, 'u.id');
+
+        $sql = 'SELECT time FROM '.$CFG->prefix.'log WHERE course='.$courseid.
+            ' AND userid NOT IN ('.implode(',', array_keys($teacherids)).')'.
+            ' ORDER BY time DESC LIMIT 1';
+
+        $last = $DB->get_record_sql($sql);
+
+        if(!$last){
+            return; //nothing to process
+        }
 
         if($start >= $final){
             $final = strtotime("midnight tomorrow", $start);
+        } else {
+            $final = $last->time;
         }
     }
 
-    while($end < $final){ //Dec 31 @ midnight (2013)
+    error_log("final: ".userdate($final, '%m/%d/%y'));
+
+    while($end < $final){ 
         do_stats_run($courseid, $start, $end); 
     
-        $end = strtotime("+1 day", $end); //23:59:59
+        $end = strtotime("+1 day", $end); 
 
         //debug only
-        //$format = '%m/%d/%y';
-        //echo "Processed from ".userdate($start, $format).' to '.userdate($end, $format)."\n";
+        $format = '%m/%d/%y';
+        error_log( "Processed from ".userdate($start, $format).' to '.userdate($end, $format)."\n");
     }
 }
 
