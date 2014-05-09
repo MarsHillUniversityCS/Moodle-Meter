@@ -140,9 +140,33 @@ class block_meter extends block_base {
             ($CFG->block_meter_cronhour * 3600);
 
         if($lastcron < $crontime and $timenow > $crontime){
+            $lock = $DB->get_record('block_meter_config',
+                array('courseid'=>-1, 'name'=>'lock'));
 
+            if($lock  &&  ($timenow - $lock->value) > (2 * 86400)){
+                //should process -- the lock was set > 2 days ago
+                //update the lock, and run the cron.
+                mtrace('Found an old lock- discarding and running cron');
+                $lock->value = $timenow;
+                $DB->update_record('block_meter_config', $lock);
+
+            } else if ($lock && ($timenow - $lock->value) < (2 * 86400)){
+                //lock exists and it's fairly new ( < 2 days ago)
+                //don't process.
+                mtrace('Found a lock- not running cron');
+                return;
+            } else {
+                //no lock found. Create one.
+                mtrace('No lockfound - creating one and beginning cron');
+                $lock = new stdClass();
+                $lock->courseid = -1;
+                $lock->name     = 'lock';
+                $lock->value    = time(); 
+                $lock->id = $DB->insert_record('block_meter_config', $lock);
+            }
+            
             //find all of the courses.
-            $courses = $DB->get_records_select('block_meter_config', '', null, '',
+            $courses = $DB->get_records_select('block_meter_config', 'courseid != -1', null, '',
                 'DISTINCT courseid');
             
             if(!$courses){
@@ -154,17 +178,22 @@ class block_meter extends block_base {
                     //b)    call do_stats_run() or
 
                     if($DB->record_exists('block_meter_config',
-                        array('courseid'=>$course->courseid))){
-                        mtrace('Incomplete do_stats_run for '.
+                        array('courseid'=>$course->courseid, 'name'=>'dostatsrun'))){
+                        mtrace('Incomplete do_stats_run for course id '.
                             $course->courseid.'. Loading historical data.');
                         
                         mtrace('Loading historical stats for course id '.
-                            $course->courseid.'...');
+                            $course->courseid.'...', '');
+
                         load_historical_data($course->courseid, 0, 0, true);
+
+                        $DB->delete_records('block_meter_config',
+                            array('courseid'=>$course->courseid, 'name'=>'dostatsrun'));
+                            
                         mtrace('Done.');
                     } else {
                         mtrace('Doing stats run for course id '.
-                            $course->courseid.'...');
+                            $course->courseid.'...', '');
                         do_stats_run($course->courseid);
                         mtrace('Done.');
                     }
@@ -175,6 +204,10 @@ class block_meter extends block_base {
         //update lastcron
         $DB->set_field('block', 'lastcron', strtotime('Today '.$cronhourdisp),
             array('name'=>'meter'));
+
+        //remove lock
+        $DB->delete_records('block_meter_config', 
+            array('courseid'=>-1, 'name'=>'lock'));
     }
 
     /**
