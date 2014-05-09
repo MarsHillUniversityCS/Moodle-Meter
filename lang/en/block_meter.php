@@ -48,7 +48,12 @@ listed categories.';
 
 $string['configchanged']    = '**If you change the category weights, the statistics will
 need to re-calculate with the new settings. This process may take several minutes.';
-$string['noconfigpresent']  = 'Please configure the Meter block before use';
+$string['noconfigpresent']  = 'Please configure the Meter block before use. <br />
+                            To do this, simply:
+                            <ol>
+                                <li>Click "Turn editing on"</li>
+                                <li>Click the settings (gear) icon for this block</li>
+                            </ol>';
 
 //admin config
 $string['cronhour']     = 'Hour to calculate statistics'; 
