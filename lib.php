@@ -94,15 +94,17 @@ function get_row_score($activity, $config){
 function do_stats_run($courseid, $start = 0, $end = 0){
     global $CFG, $DB;
 
-    //the other problem - what if this has already been run today? Do we care
+    //WHY WOULD THIS HAPPEN? CAN IT HAPPEN?
+    //What if this has already been run today? Do we care
     //about having multiple runs/day?
+    //Should probably delete the other run on this day, and associated data,
+    //and run this one. This ensures the X-Axis on the graph is correct later.
+    //UPDATE: Not worrying about this currently - don't think it'll be a problem.
 
-    //Add a flag, 'has_started' to mdl_config - remove it when this 
-    //function is done.
-    //If cron encounters a 'has_started' flag, it would signify that a previous run
-    //has been interrupted, and needs to re-do the stats for this course.
-    //Thoughts?
 
+    //Add a flag, 'dostatsrun' to mdl_config - remove it when this 
+    //function is done.  If cron encounters a 'dostatsrun' flag, it would signify that a
+    //previous run has been interrupted, and needs to re-do the stats for this course.
     $jobflag = new stdClass();
     $jobflag->courseid  = $courseid;
     $jobflag->name      = 'dostatsrun';
@@ -114,9 +116,6 @@ function do_stats_run($courseid, $start = 0, $end = 0){
         error_log("Error setting do_stats_run started flag");
     }
 
-
-
-    
     $statsrun = new stdClass();
     $statsrun->courseid = $courseid;
     $statsrun->mean = 0;
