@@ -48,6 +48,8 @@ class block_meter extends block_base {
             $DB->set_field('block_instances', 'defaultweight', -2,
                 array('id'=>$this->instance->id));
 
+            //why not just set the default config from global? TODO
+
             $this->content->text .= 
                 get_string('noconfigpresent', 'block_meter');
 
@@ -239,7 +241,8 @@ class block_meter extends block_base {
         //load_historical_data() if it's the first time.
         //only load_historical_data if config values have changed.
         if($hasChanged){
-            error_log("Meter: Config has changed - running load_historical_data()");
+            error_log("Meter: Config has changed for course ".$COURSE->id.
+                "- running load_historical_data()");
             load_historical_data($COURSE->id, 0, 0, true);
         }
     }
