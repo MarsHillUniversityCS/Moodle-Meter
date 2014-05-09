@@ -34,7 +34,7 @@ class block_meter extends block_base {
     }
 
     function get_content() {
-        global $COURSE, $CFG, $USER, $OUTPUT, $SESSION;
+        global $COURSE, $CFG, $USER, $OUTPUT, $SESSION, $DB;
         if($this->content !== NULL){
             return $this->content;
         }
@@ -44,22 +44,16 @@ class block_meter extends block_base {
 
         if(!isset($this->config)){
 
-            $configurl = new moodle_url($CFG->wwwroot.
-                '/course/view.php', array('id'=>$COURSE->id, 'sesskey'=>sesskey(),
-                'bui_editid'=>$this->instance->id));
-            
-            $this->content->text .= $OUTPUT->action_link($configurl, 
-                get_string('noconfigpresent', 'block_meter'));
+            //why not also set the default weight here?
+            $DB->set_field('block_instances', 'defaultweight', -2,
+                array('id'=>$this->instance->id));
+
+            $this->content->text .= 
+                get_string('noconfigpresent', 'block_meter');
 
             return $this->content->text;
-
         }
 
-
-        /*
-        $this->content->text    .= '<h4>The Moodle Meter Block</h4>';
-        $this->content->text    .= '<br />';//.$COURSE->id;
-        */
         $graphurl = new moodle_url($CFG->wwwroot.'/blocks/meter/user_graph.php',
             array('id'=>$COURSE->id));
 
