@@ -25,7 +25,7 @@ if ($ADMIN->fulltree) {
     $settings->add(
         new admin_setting_configtext('block_meter_default_weight',
         get_string('defaultweight', 'block_meter'), 
-        get_string('defaultweightdesc', 'block_meter'), 1, PARAM_INT));
+        get_string('defaultweightdesc', 'block_meter'), 5, PARAM_INT));
     
 
 }
