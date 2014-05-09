@@ -92,7 +92,11 @@ function get_row_score($activity, $config){
 }
 
 function do_stats_run($courseid, $start = 0, $end = 0){
-    global $DB;
+    global $CFG, $DB;
+
+    //the other problem - what if this has already been run today? Do we care
+    //about having multiple runs/day?
+
     //Add a flag, 'has_started' to mdl_config - remove it when this 
     //function is done.
     //If cron encounters a 'has_started' flag, it would signify that a previous run
@@ -110,7 +114,8 @@ function do_stats_run($courseid, $start = 0, $end = 0){
         error_log("Error setting do_stats_run started flag");
     }
 
-    global $CFG, $DB;
+
+
     
     $statsrun = new stdClass();
     $statsrun->courseid = $courseid;
@@ -166,7 +171,7 @@ function do_stats_run($courseid, $start = 0, $end = 0){
 
     $resultid = $DB->update_record('block_meter_stats', $statsrun);
     if(!$resultid)
-        error_log('Unable to update block_meterstats with mean and stdv.');
+        error_log('Unable to update block_meter_stats with mean and stdv.');
 
     //set the zscore for each student, now that we have mean and stddev
     foreach($studentstatslist as $student){
@@ -396,8 +401,8 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
         }
     }
 
-    error_log("start: ".userdate($start, '%m/%d/%y').' '.$start);
-    error_log("final: ".userdate($final, '%m/%d/%y').' '.$final);
+    //error_log("start: ".userdate($start, '%m/%d/%y').' '.$start);
+    //error_log("final: ".userdate($final, '%m/%d/%y').' '.$final);
 
     while($end < $final){ 
         do_stats_run($courseid, $start, $end); 
@@ -405,8 +410,9 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
         $end = strtotime("+1 day", $end); 
 
         //debug only
-        $format = '%m/%d/%y';
-        error_log( "Processed from ".userdate($start, $format).' to '.userdate($end, $format)."\n");
+        //$format = '%m/%d/%y';
+        //error_log( "Processed from ".
+        //    userdate($start, $format).' to '.userdate($end, $format)."\n");
     }
 }
 
