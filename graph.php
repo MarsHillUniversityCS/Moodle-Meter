@@ -48,9 +48,32 @@ $chart = new graph(1324,768);
 $chart->parameter['title'] = 'Moodle Meter Stats';
 $chart->parameter['x_label'] = 'Date';
 $chart->parameter['y_label_left'] = 'Z-Score';
-    
-$colorarray = array('blue', 'yellow', 'green', 'red', 'orange', 'maroon', 
-    'purple', 'gray', 'ltblue', 'navy', 'olive', 'fuchsia', 'ltgreen');
+
+/* Define extra colors to use in the graph */
+$chart->colour['pink']      = ImageColorAllocate($chart->image, 0xFF, 0x33, 0x99);    
+$chart->colour['crimson']   = ImageColorAllocate($chart->image, 0xDC, 0x14, 0x3C);    
+$chart->colour['gold']      = ImageColorAllocate($chart->image, 0xFF, 0xD7, 0x00);    
+$chart->colour['goldenrod'] = ImageColorAllocate($chart->image, 0xDA, 0xA5, 0x20);    
+$chart->colour['darkkhaki'] = ImageColorAllocate($chart->image, 0xBD, 0xB7, 0x6B);    
+$chart->colour['lawngreen'] = ImageColorAllocate($chart->image, 0x7C, 0xFC, 0x00);    
+$chart->colour['lime']      = ImageColorAllocate($chart->image, 0x00, 0xFF, 0x00);    
+$chart->colour['seagreen']  = ImageColorAllocate($chart->image, 0x8F, 0xBC, 0x8F);    
+$chart->colour['teal']      = ImageColorAllocate($chart->image, 0x00, 0x80, 0x80);    
+$chart->colour['cyan']      = ImageColorAllocate($chart->image, 0x00, 0xFF, 0xFF);    
+$chart->colour['steelblue'] = ImageColorAllocate($chart->image, 0x46, 0x82, 0xB4);    
+$chart->colour['indigo']    = ImageColorAllocate($chart->image, 0x4B, 0x00, 0x82);    
+$chart->colour['magenta']   = ImageColorAllocate($chart->image, 0x8B, 0x00, 0x8B);    
+$chart->colour['plum']      = ImageColorAllocate($chart->image, 0xDD, 0xA0, 0xDD);    
+$chart->colour['sienna']    = ImageColorAllocate($chart->image, 0xA0, 0x52, 0x2D);    
+/* End of extra colors */
+
+$colorarray = array('blue', 'crimson', 'gold', 'green', 
+    'red', 'goldenrod', 'purple', 'lawngreen', 'teal',
+    'cyan', 'seagreen', 'steelblue', 'darkkhaki', 'gray', 
+    'ltblue', 'navy', 'indigo', 'magenta', 'plum', 'sienna', 
+    'maroon', 'olive', 'fuchsia', 'pink', 'lime', 'yellow', 'ltgreen',
+    'orange');
+
     
     
 /***********************************************
