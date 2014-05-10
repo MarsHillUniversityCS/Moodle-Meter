@@ -61,7 +61,7 @@ function get_row_score($activity, $config){
     $tier3      = $config['tier3_weight']; //resources/pages/URLs/folders
     $tier4      = $config['tier4_weight']; //forums
     $tier5      = $config['tier5_weight']; //book/blog/wiki
-    $tier6      = $config['tier6_weight']; //chat/choice/message
+    $tier6      = $config['tier6_weight']; //course views
     $default    = $config['default_weight'];
 
     $score      = 0;
@@ -80,10 +80,9 @@ function get_row_score($activity, $config){
         $activity->module=='blog' ||
         $activity->module=='wiki'){ 
         $score += $tier5;
-    } else if($activity->module=='chat' || 
-        $activity->module=='choice' ||
-        $activity->module=='message'){ 
-        $score += $tier6;
+    } else if($activity->module=='course' &&
+        preg_match('/^view/i', $activity->action)){ 
+            $score += $tier6;
     } else{
         $score += $default;
     }

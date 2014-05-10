@@ -41,7 +41,7 @@ $string['tier4desc']    = '(forum activity)';
 $string['tier5']        = 'Category 5 weight';
 $string['tier5desc']    = '(book/blog/wiki activity)';
 $string['tier6']        = 'Category 6 weight';
-$string['tier6desc']    = '(chat/choice/message activity)';
+$string['tier6desc']    = '(Course views)';
 $string['defaultweight']        = 'Weight for all other activities';
 $string['defaultweightdesc']    = 'Weight for any log activity for a course other than the above
 listed categories.';
@@ -52,7 +52,8 @@ $string['noconfigpresent']  = 'Please configure the Meter block before use. <br 
                             To do this, simply:
                             <ol>
                                 <li>Click "Turn editing on"</li>
-                                <li>Click the settings (gear) icon for this block</li>
+                                <li>Click the settings (gear) icon</li>
+                                <li>Click \'Save changes\'</li>
                             </ol>';
 
 //admin config
