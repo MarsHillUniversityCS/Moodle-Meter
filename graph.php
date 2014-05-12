@@ -114,7 +114,7 @@ if($isteacher && $userid == 0){
     }
 
     $chart->y_order = array_keys($datalist);
-} else{ //If a student views the graph or teacher views one student
+} else { //If a student views the graph or teacher views one student
 
     //echo var_dump($ydata);
     $chart->y_data[1] = $datalist[$userid];
@@ -165,6 +165,7 @@ $chart->parameter['x_axis_gridlines']   = 'auto'; // no x ticks (colour = 'none'
 
 $chart->parameter['legend']           = 'outside-top';
 $chart->parameter['legend_border']    = 'black';
+$chart->parameter['legend_size']    = 11;
 
 // draw it.
 $chart->draw();
