@@ -45,7 +45,7 @@ if(!$isteacher && $userid == 0){
 }
 
 $chart = new graph(1324,768);
-$chart->parameter['title'] = 'Moodle Meter Stats';
+$chart->parameter['title'] = 'Moodle Activity Statistics';
 $chart->parameter['x_label'] = 'Date';
 $chart->parameter['y_label_left'] = 'Z-Score';
 
