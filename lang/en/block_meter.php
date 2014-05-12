@@ -95,9 +95,12 @@ $string['statdesc']   =     '<h3>Statistics information</h3>
                             <br />
                             In a normal distribution,
                             <ul>
-                                <li>Roughly 68% lie within 1 standard deviation</li>
-                                <li>Roughly 95% lie within 2 standard deviations</li>
-                                <li>Roughly 99% lie within 3 standard deviations</li>
+                                <li>Roughly 68% lie within 1 standard deviation (from -1
+                                to 1)</li>
+                                <li>Roughly 95% lie within 2 standard deviations (from -2
+                                to 2)</li>
+                                <li>Roughly 99% lie within 3 standard deviations (from -3
+                                to 3)</li>
                             </ul>
                             The standard deviations are shown on the Y axis. </li>
                             <li><b>Z-Score</b> - A student\'s z-score describes how many
@@ -106,15 +109,15 @@ $string['statdesc']   =     '<h3>Statistics information</h3>
                             </ul>';
 
 //Levels
-$string['level1user'] = 'Your Moodle usage is significantly less than that of your peers'.
+$string['level1user'] = 'Your Moodle activity is significantly less than that of your peers'.
                         ' in this course.';
-$string['level2user'] = 'Your Moodle usage is slightly less than that of your peers'.
+$string['level2user'] = 'Your Moodle activity is slightly less than that of your peers'.
                         ' in this course.';
-$string['level3user'] = 'Your Moodle usage is about average compared to that of your peers'.
+$string['level3user'] = 'Your Moodle activity is about average compared to that of your peers'.
                         ' in this course.';
-$string['level4user'] = 'Your Moodle usage is somewhat more than that of your peers'.
+$string['level4user'] = 'Your Moodle activity is somewhat more than that of your peers'.
                         ' in this course.';
-$string['level5user'] = 'Your Moodle usage is significantly more than that of your peers'.
+$string['level5user'] = 'Your Moodle activity is significantly more than that of your peers'.
                         ' in this course.';
 
 
