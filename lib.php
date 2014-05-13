@@ -90,6 +90,30 @@ function get_row_score($activity, $config){
     return $score;
 }
 
+function set_job_flag($courseid){
+    global $DB;
+    $jobflag = new stdClass();
+    $jobflag->courseid  = $courseid;
+    $jobflag->name      = 'dostatsrun';
+    $jobflag->value     = time();
+
+    $jobflag->id        = $DB->insert_record('block_meter_config', $jobflag);
+
+    if(!$jobflag->id) {
+        error_log("Error setting do_stats_run started flag");
+    }
+
+    return $jobflag->id;
+}
+
+function remove_job_flag($courseid){
+    global $DB;
+
+    //remove the flag
+    $DB->delete_records('block_meter_config', array('courseid'=>$courseid));
+
+}
+
 function do_stats_run($courseid, $start = 0, $end = 0){
     global $CFG, $DB;
 
@@ -101,19 +125,20 @@ function do_stats_run($courseid, $start = 0, $end = 0){
     //UPDATE: Not worrying about this currently - don't think it'll be a problem.
 
 
-    //Add a flag, 'dostatsrun' to mdl_config - remove it when this 
+    //what about this -
+    //If there's been no activity since the last stats run, do nothing
+    //If there's been no stats run in > 24 hours, but now there's data since 
+    //the last stats run, do each day between last stats run and today.
+    //Most often, we short-circuit because there's been no activity. If there
+    //is new activity, we process each day at a time until we reach today.
+    //Good? Bad? What if we're called by load_historical_data? Does this
+    //create a loop of sorts?
+
+
+    //Add a flag, 'dostatsrun' to mdl_block_meter_config - remove it when this 
     //function is done.  If cron encounters a 'dostatsrun' flag, it would signify that a
     //previous run has been interrupted, and needs to re-do the stats for this course.
-    $jobflag = new stdClass();
-    $jobflag->courseid  = $courseid;
-    $jobflag->name      = 'dostatsrun';
-    $jobflag->value     = time();
-
-    $jobflag->id        = $DB->insert_record('block_meter_config', $jobflag);
-
-    if(!$jobflag->id) {
-        error_log("Error setting do_stats_run started flag");
-    }
+    set_job_flag($courseid);
 
     $statsrun = new stdClass();
     $statsrun->courseid = $courseid;
@@ -185,9 +210,7 @@ function do_stats_run($courseid, $start = 0, $end = 0){
         }
     }
 
-
-    //remove the flag
-    $DB->delete_records('block_meter_config', array('id'=>$jobflag->id));
+    remove_job_flag();
 
     return;
 }
@@ -398,9 +421,6 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
             $final = strtotime("midnight tomorrow", $start);
         }
     }
-
-    //error_log("start: ".userdate($start, '%m/%d/%y').' '.$start);
-    //error_log("final: ".userdate($final, '%m/%d/%y').' '.$final);
 
     while($end < $final){ 
         do_stats_run($courseid, $start, $end); 
