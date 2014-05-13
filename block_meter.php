@@ -149,11 +149,11 @@ class block_meter extends block_base {
             } else if ($lock && ($timenow - $lock->value) < (2 * 86400)){
                 //lock exists and it's fairly new ( < 2 days ago)
                 //don't process.
-                mtrace('Found a lock- not running cron');
+                mtrace('Found a lock - not running cron');
                 return;
             } else {
                 //no lock found. Create one.
-                mtrace('No lockfound - creating one and beginning cron');
+                mtrace('No lock found - creating one and beginning cron');
                 $lock = new stdClass();
                 $lock->courseid = -1;
                 $lock->name     = 'lock';
@@ -161,7 +161,7 @@ class block_meter extends block_base {
                 $lock->id = $DB->insert_record('block_meter_config', $lock);
             }
             
-            //find all of the courses.
+            //find all of the courses with configs
             $courses = $DB->get_records_select('block_meter_config', 'courseid != -1', null, '',
                 'DISTINCT courseid');
             
@@ -242,7 +242,7 @@ class block_meter extends block_base {
         //only load_historical_data if config values have changed.
         if($hasChanged){
             error_log("Meter: Config has changed for course ".$COURSE->id.
-                "- running load_historical_data()");
+                " - running load_historical_data()");
             load_historical_data($COURSE->id, 0, 0, true);
         }
     }
