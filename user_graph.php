@@ -28,6 +28,8 @@ require_once('lib.php');
 
 require_login();
 
+global $DB, $CFG, $COURSE;
+
 $courseid = required_param('id', PARAM_INT);
 $userid = optional_param('userid', 0, PARAM_INT);
 
@@ -64,7 +66,23 @@ echo $OUTPUT->header();
 $imageurl = new moodle_url('/blocks/meter/graph.php', array('id'=>$courseid, 'userid'=>$userid));
 $graph = html_writer::empty_tag('img', array('src' => $imageurl, 'alt'=>'Moodle Meter Graph'));
 
-echo html_writer::tag('div', $graph, array('class' => 'graph'));
+//don't write the graph unless there is data? Show a message otherwise.
+$statsforcourse = $DB->get_records('block_meter_stats',
+    array('courseid'=>$COURSE->id), '', 'id');
+
+if($statsforcourse && sizeof($statsforcourse) > 2){
+    $numRecs = $DB->count_records_select('block_meter_studentstats',
+        'statsid in ('.implode(',', array_keys($statsforcourse)).')');
+
+    if($numRecs > 0)
+        echo html_writer::tag('div', $graph, array('class' => 'graph'));
+    else
+        echo ("<h3>Not enough student data to produce a graph at this time.</h3>");
+
+} else {
+    echo ("<h3>Not enough student data to produce a graph at this time.</h3>");
+}
+
 if($isteacher)
     echo get_string('graphdesc', 'block_meter');
 
