@@ -190,7 +190,7 @@ class block_meter extends block_base {
                     } else {
                         mtrace('Doing stats run for course id '.
                             $course->courseid.'...', '');
-                        do_stats_run($course->courseid);
+                        do_cron_stats_run($course->courseid);
                         mtrace('Done.');
                     }
                 }
@@ -220,22 +220,27 @@ class block_meter extends block_base {
             $rec = $DB->get_record('block_meter_config',
                 array('courseid'=>$COURSE->id,'name'=>$name));
 
-            $conf = new stdClass;
-            $conf->name = $name;
-            $conf->value = $value;
-            $conf->courseid= $COURSE->id;
+            $conf           = new stdClass;
+            $conf->name     = $name;
+            $conf->value    = $value;
+            $conf->courseid = $COURSE->id;
 
 
             if($rec){
                 $conf->id = $rec->id;
                 if($config[$conf->name] != $conf->value) $hasChanged = true;
-                $DB->update_record('block_meter_config',$conf);
+                //error_log("Updating existing record");
+                $DB->update_record('block_meter_config', $conf);
             } else {
                 $hasChanged = true;
-                $DB->insert_record('block_meter_config',$conf);
+                //error_log("inserting new record");
+                //error_log(print_r($conf, true));
+                $result = $DB->insert_record('block_meter_config', $conf);
+                //error_log("result from insert is $result");
             }
 
         }
+
 
         //check to see if this 'update' needs to trigger a load_historical_data()
         //load_historical_data() if it's the first time.
@@ -243,8 +248,11 @@ class block_meter extends block_base {
         if($hasChanged){
             error_log("Meter: Config has changed for course ".$COURSE->id.
                 " - running load_historical_data()");
+
             load_historical_data($COURSE->id, 0, 0, true);
         }
+
+        return;
     }
 
 
