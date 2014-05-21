@@ -110,8 +110,61 @@ function remove_job_flag($courseid){
     global $DB;
 
     //remove the flag
-    $DB->delete_records('block_meter_config', array('courseid'=>$courseid));
+    $DB->delete_records('block_meter_config', array('courseid'=>$courseid,
+        'name'=>'dostatsrun'));
 
+}
+
+function do_cron_stats_run($courseid, $start = 0, $end = 0){
+    global $CFG, $DB, $COURSE;
+
+    if($start == 0 || $end == 0){ //if a defined term is not given
+
+        //if no activity since the last run
+        $lastactivity   = find_student_activity($courseid, false);
+        $laststats      = find_last_stats_run($courseid);
+
+        //don't go further, if there's no activity to process
+        if($laststats > $lastactivity){
+            error_log('No activity for course '.$courseid.'. Exiting');
+            return;
+        }
+        
+        $firstactivity   = find_student_activity($courseid);
+
+
+
+        //what if we've skipped a previous day? Need to go back, process it and others
+        //until we reach today.
+        $now = time();
+        //if this is true, there was no stats_run at all yesterday.
+        //must be due to no activity
+        if((strtotime('midnight', $now) - 86400) >= $laststats){
+        
+            //error_log('There has been more than a day since last stats');
+            $end = strtotime('midnight tomorrow', $laststats);
+            if($laststats == 0){
+                $end = $now - 86401; //huh?
+            }
+
+            $format = '%m/%d/%y';
+            while(($end + 86400) < $now){ 
+
+                /*
+                error_log('Running stats for start: '.userdate($firstactivity, $format).
+                    ' to end: '.userdate($end, $format));
+                */
+
+                do_stats_run($courseid, $firstactivity, $end);
+
+                $end = strtotime("+1 day", $end); 
+            }
+
+
+        } else { //normal stats run
+            do_stats_run($courseid);
+        }
+    }
 }
 
 function do_stats_run($courseid, $start = 0, $end = 0){
@@ -123,16 +176,6 @@ function do_stats_run($courseid, $start = 0, $end = 0){
     //Should probably delete the other run on this day, and associated data,
     //and run this one. This ensures the X-Axis on the graph is correct later.
     //UPDATE: Not worrying about this currently - don't think it'll be a problem.
-
-
-    //what about this -
-    //If there's been no activity since the last stats run, do nothing
-    //If there's been no stats run in > 24 hours, but now there's data since 
-    //the last stats run, do each day between last stats run and today.
-    //Most often, we short-circuit because there's been no activity. If there
-    //is new activity, we process each day at a time until we reach today.
-    //Good? Bad? What if we're called by load_historical_data? Does this
-    //create a loop of sorts?
 
 
     //Add a flag, 'dostatsrun' to mdl_block_meter_config - remove it when this 
@@ -152,6 +195,7 @@ function do_stats_run($courseid, $start = 0, $end = 0){
 
    
     //Gives all students enrolled in this course
+    //error_log("Course id is: ".$courseid);
     $context = get_context_instance(CONTEXT_COURSE, $courseid);
     $students = get_enrolled_users($context, 'mod/assignment:submit', 0, 'u.id');
 
@@ -170,7 +214,7 @@ function do_stats_run($courseid, $start = 0, $end = 0){
 
         $resultid = $DB->insert_record('block_meter_studentstats', $studentstats);
         if(!$resultid)
-            error_log ('Failed to intert student stats for course '.
+            error_log ('Failed to insert student stats for course '.
                 $courseid.' and student '.$student->id);
         $studentstats->id = $resultid;
         $studentstatslist[] = $studentstats;
@@ -210,7 +254,7 @@ function do_stats_run($courseid, $start = 0, $end = 0){
         }
     }
 
-    remove_job_flag();
+    remove_job_flag($courseid);
 
     return;
 }
@@ -360,11 +404,63 @@ function get_global_config(){
 
 
 /**
+* Return the time of the first (if $asc==true) or the last (if $asc==false)
+* student access to this course
+*/
+function find_student_activity($courseid, $asc=true){
+    global $DB, $CFG;
+
+    $context = get_context_instance(CONTEXT_COURSE, $courseid);
+    $studentids = get_enrolled_users($context, 'mod/assignment:submit',
+        0, 'u.id');
+
+    if($asc){
+        $sql = 'SELECT time FROM '.$CFG->prefix.'log WHERE course='.$courseid.
+            ' AND userid IN ('.implode(',', array_keys($studentids)).')'.
+            ' ORDER BY time ASC LIMIT 1';
+    } else {
+        $sql = 'SELECT time FROM '.$CFG->prefix.'log WHERE course='.$courseid.
+            ' AND userid IN ('.implode(',', array_keys($studentids)).')'.
+            ' ORDER BY time DESC LIMIT 1';
+    }
+
+    $access = $DB->get_record_sql($sql);
+    
+    if(!$access){
+        return 0; //nothing to process
+    }
+    
+    return $access->time;
+
+}
+
+
+/**
+* return the epoch time of the last stats run
+* if no stats run yet, return 0
+*/
+function find_last_stats_run($courseid){
+
+    global $DB, $CFG;
+
+    $sql = 'SELECT statstime FROM '.$CFG->prefix.'block_meter_stats WHERE courseid='.$courseid.
+    ' ORDER BY statstime DESC LIMIT 1';
+
+    $access = $DB->get_record_sql($sql);
+    
+    if(!$access){
+        return 0; //nothing to process
+    }
+    
+    return $access->statstime;
+}
+
+
+/**
 * Processes all data from $start - $final, processing one day at a time
 */
 function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = false){
     global $CFG, $DB; 
-
     if($deleteprev){
         //what if the data isn't there?
 
@@ -377,24 +473,16 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
         }
     }
 
+
     //they didn't provide a startime. Use the first log entry time - last log entry time
     if($start == 0 || $start > time()) { 
 
-        $context = get_context_instance(CONTEXT_COURSE, $courseid);
-        $studentids = get_enrolled_users($context, 'mod/assignment:submit',
-            0, 'u.id');
-
-        $sql = 'SELECT time FROM '.$CFG->prefix.'log WHERE course='.$courseid.
-            ' AND userid IN ('.implode(',', array_keys($studentids)).')'.
-            ' ORDER BY time ASC LIMIT 1';
-
-        $first = $DB->get_record_sql($sql);
-
-        if(!$first){
+        $first = find_student_activity($courseid);
+        if($first == 0){
             return; //nothing to process
         }
 
-        $start = strtotime("midnight", $first->time);
+        $start = strtotime("midnight", $first);
         $end = strtotime("+1 day", $start);
 
     }
@@ -402,35 +490,31 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
     //they didn't say when to stop - stop last day of student activity
     if($final == 0 || $start > $final){
 
-        $context = get_context_instance(CONTEXT_COURSE, $courseid);
-        $studentids = get_enrolled_users($context, 'mod/assignment:submit',
-            0, 'u.id');
+        $last = find_student_activity($courseid, false);
 
-        $sql = 'SELECT time FROM '.$CFG->prefix.'log WHERE course='.$courseid.
-            ' AND userid IN ('.implode(',', array_keys($studentids)).')'.
-            ' ORDER BY time DESC LIMIT 1';
-
-        $last = $DB->get_record_sql($sql);
-
-        if(!$last){
+        if($last == 0){
             return; //nothing to process
         }
 
-        $final = $last->time;
+        $final = $last;
         if($start >= $final){
             $final = strtotime("midnight tomorrow", $start);
         }
     }
 
+
+    if($final < $end) $final = $end + 1;
     while($end < $final){ 
         do_stats_run($courseid, $start, $end); 
     
         $end = strtotime("+1 day", $end); 
 
         //debug only
-        //$format = '%m/%d/%y';
-        //error_log( "Processed from ".
-        //    userdate($start, $format).' to '.userdate($end, $format)."\n");
+        /*
+        $format = '%m/%d/%y';
+        error_log( "Processed from ".
+            userdate($start, $format).' to '.userdate($end, $format)."\n");
+        */
     }
 }
 
