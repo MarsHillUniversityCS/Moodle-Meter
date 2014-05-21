@@ -108,7 +108,16 @@ $string['statdesc']   =     '<h3>Statistics information</h3>
                             negative) the mean activity score.</li>
                             </ul>';
 
-//Levels
+//block_meter.php
+$string['noactivitypleasewait'] = 'No activity data present. Please wait 24 hours and try
+again.';
+$string['shortleveloverview']   = 'Students are ranked according to their activity in this course. 
+    <ul>
+        <li><b>Level 1</b> - low activity</li>
+        <li><b>Level 3</b> - average</li>
+        <li><b>Level 5</b> - high activity</li>
+    </ul>'; 
+
 $string['level1user'] = 'Your Moodle activity is significantly less than that of your peers'.
                         ' in this course.';
 $string['level2user'] = 'Your Moodle activity is slightly less than that of your peers'.

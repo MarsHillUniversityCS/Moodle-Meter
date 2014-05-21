@@ -62,9 +62,13 @@ class block_meter extends block_base {
         if(has_capability('moodle/grade:viewall', $this->context)){
             $students = get_all_student_stats($COURSE->id);
             if(!$students){
-                $this->content->text .= 'No activity data present. Please try again in 24 hours';
+                $this->content->text .= get_string('noactivitypleasewait', 'block_meter');
                 return $this->content->text;
             }
+
+            $this->content->text .= get_string('shortleveloverview', 'block_meter');
+            $this->content->text .= '<br />';
+
 
             foreach ($students as $student){
                 
@@ -91,13 +95,14 @@ class block_meter extends block_base {
             //assume they're avg(3)? Bigger prob here; student doesn't exist.
             if(!$level) $level = 3; 
 
+            $this->content->text .= get_string('level'.$level.'user', 'block_meter');
+            $this->content->text .= '<br />';
+
             $graphurl->params(array('userid'=>$USER->id));
             $this->content->text .= $OUTPUT->action_icon($graphurl,
                         new pix_icon('level'.$level, get_string('viewgraph', 'block_meter'),
                         'block_meter'));
 
-            $this->content->text .= '<br />';
-            $this->content->text .= get_string('level'.$level.'user', 'block_meter');
         }
 
         return $this->content;
