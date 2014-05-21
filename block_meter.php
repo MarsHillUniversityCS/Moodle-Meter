@@ -70,8 +70,8 @@ class block_meter extends block_base {
             $this->content->text .= '<br />';
 
 
+            $count = 0;
             foreach ($students as $student){
-                
                 $graphurl->params(array('userid'=>$student->userid));
 
                 $this->content->text .= 
@@ -81,6 +81,19 @@ class block_meter extends block_base {
 
                 $this->content->text .= $OUTPUT->action_link($graphurl, 
                     $student->lastname.', '.$student->firstname).'<br />';
+
+                $count++;
+                if($count >= 20){ //don't show an exhaustive list
+
+                    $moreurl = new moodle_url($CFG->wwwroot.
+                        '/blocks/meter/all_users.php',
+                        array('id'=>$COURSE->id));
+
+                    $this->content->text .= 
+                        $OUTPUT->action_link($moreurl, 
+                            get_string('viewall', 'block_meter')).'<br />';
+                    break;
+                }
             }
 
             $graphurl->remove_params('userid');

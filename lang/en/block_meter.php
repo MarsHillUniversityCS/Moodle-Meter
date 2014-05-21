@@ -109,8 +109,9 @@ $string['statdesc']   =     '<h3>Statistics information</h3>
                             </ul>';
 
 //block_meter.php
-$string['noactivitypleasewait'] = 'No activity data present. Please wait 24 hours and try
-again.';
+$string['noactivitypleasewait'] = 'No activity data present. Please wait 24 hours and try again.';
+$string['viewall']  = 'View all...';
+
 $string['shortleveloverview']   = 'Students are ranked according to their activity in this course. 
     <ul>
         <li><b>Level 1</b> - low activity</li>
