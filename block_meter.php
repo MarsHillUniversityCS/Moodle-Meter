@@ -114,7 +114,7 @@ class block_meter extends block_base {
             $graphurl->params(array('userid'=>$USER->id));
             $this->content->text .= $OUTPUT->action_icon($graphurl,
                         new pix_icon('level'.$level, get_string('viewgraph', 'block_meter'),
-                        'block_meter'));
+                        'block_meter', array('width'=>'250px')));
 
         }
 
