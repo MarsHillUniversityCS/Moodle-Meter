@@ -63,20 +63,24 @@ $PAGE->set_heading($strtitle);
 
 echo $OUTPUT->header();
 
-$imageurl = new moodle_url('/blocks/meter/graph.php', array('id'=>$courseid, 'userid'=>$userid));
-$graph = html_writer::empty_tag('img', array('src' => $imageurl, 'alt'=>'Moodle Meter Graph'));
-
 //don't write the graph unless there is data? Show a message otherwise.
 $statsforcourse = $DB->get_records('block_meter_stats',
     array('courseid'=>$COURSE->id), '', 'id');
 
 if($statsforcourse && sizeof($statsforcourse) > 2){
+
     $numRecs = $DB->count_records_select('block_meter_studentstats',
         'statsid in ('.implode(',', array_keys($statsforcourse)).')');
 
-    if($numRecs > 0)
-        echo html_writer::tag('div', $graph, array('class' => 'graph'));
-    else
+    if($numRecs > 0){
+        $imageurl = new moodle_url('/blocks/meter/graph.php', 
+            array('id'=>$courseid, 'userid'=>$userid));
+        $graph = html_writer::empty_tag('img', 
+            array('src' => $imageurl, 'alt'=>'Moodle Meter Graph',
+            'class'=>'meter_graph'));
+
+        echo html_writer::tag('div', $graph, array('class' => 'meter_graph'));
+    } else
         echo ("<h3>Not enough student data to produce a graph at this time.</h3>");
 
 } else {
