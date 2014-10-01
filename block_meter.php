@@ -273,5 +273,35 @@ class block_meter extends block_base {
         return;
     }
 
+    function instance_delete() {
+
+        //deleting the course removes ALL associated meter data
+
+        //remove the necessary data
+        global $DB, $COURSE;
+
+        //Find all of the stats runs, and delete the associated
+        //studentstats entries
+        $statsruns = $DB->get_records('block_meter_stats',
+            array('courseid'=>$COURSE->id), '', 'id');
+
+        if($statsruns){
+            foreach ($statsruns as $stats){
+                $DB->delete_records('block_meter_studentstats',
+                    array('statsid'=>$stats->id));
+            }
+        }
+
+        //then delete the statsrun
+        $DB->delete_records('block_meter_stats',
+            array('courseid'=>$COURSE->id));
+
+        //delete the config associated with that course
+        $DB->delete_records('block_meter_config',
+            array('courseid'=>$COURSE->id));
+
+
+    }
+
 
 }
