@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This block will provide admin functions for TimeTracker
+ * This block will provide admin functions for Moodle Meter
  *
  * @package    Block
  * @subpackage Meter
