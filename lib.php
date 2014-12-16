@@ -196,7 +196,7 @@ function do_stats_run($courseid, $start = 0, $end = 0){
    
     //Gives all students enrolled in this course
     //error_log("Course id is: ".$courseid);
-    $context = get_context_instance(CONTEXT_COURSE, $courseid);
+    $context = context_course::instance($courseid);
     $students = get_enrolled_users($context, 'mod/assignment:submit', 0, 'u.id');
 
     if(!$students)
@@ -410,7 +410,7 @@ function get_global_config(){
 function find_student_activity($courseid, $asc=true){
     global $DB, $CFG;
 
-    $context = get_context_instance(CONTEXT_COURSE, $courseid);
+    $context = context_course::instance($courseid);
     $studentids = get_enrolled_users($context, 'mod/assignment:submit',
         0, 'u.id');
 
