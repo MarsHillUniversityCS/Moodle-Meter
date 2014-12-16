@@ -32,7 +32,7 @@ require_login();
 $courseid = required_param('id', PARAM_INT);
 $userid = optional_param('userid', 0, PARAM_INT);
 
-$context = get_context_instance(CONTEXT_COURSE, $courseid);
+$context = context_course::instance($courseid);
 
 $isteacher = false;
 if (has_capability('moodle/grade:viewall', $context)) { //teacher
