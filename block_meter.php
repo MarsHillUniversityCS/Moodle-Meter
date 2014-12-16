@@ -39,7 +39,6 @@ class block_meter extends block_base {
             return $this->content;
         }
 
-
         $this->content = new stdClass;
 
         if(!isset($this->config)){
@@ -52,6 +51,7 @@ class block_meter extends block_base {
 
             $this->content->text .= 
                 get_string('noconfigpresent', 'block_meter');
+            
 
             return $this->content->text;
         }
@@ -117,7 +117,6 @@ class block_meter extends block_base {
                         'block_meter', array('width'=>'250px')));
 
         }
-
         return $this->content;
     }
     
@@ -278,12 +277,17 @@ class block_meter extends block_base {
         //deleting the course removes ALL associated meter data
 
         //remove the necessary data
-        global $DB, $COURSE;
+        global $DB;
+
+        //$COURSE->id doesn't work if not deleted from w/in course
+        $thiscoursecon = $this->context->get_course_context();
+        $courseid = $thiscoursecon->instanceid;
+
 
         //Find all of the stats runs, and delete the associated
         //studentstats entries
         $statsruns = $DB->get_records('block_meter_stats',
-            array('courseid'=>$COURSE->id), '', 'id');
+            array('courseid'=>$courseid), '', 'id');
 
         if($statsruns){
             foreach ($statsruns as $stats){
@@ -294,14 +298,10 @@ class block_meter extends block_base {
 
         //then delete the statsrun
         $DB->delete_records('block_meter_stats',
-            array('courseid'=>$COURSE->id));
+            array('courseid'=>$courseid));
 
         //delete the config associated with that course
         $DB->delete_records('block_meter_config',
-            array('courseid'=>$COURSE->id));
-
-
+            array('courseid'=>$courseid));
     }
-
-
 }
