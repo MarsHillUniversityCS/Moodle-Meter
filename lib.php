@@ -199,8 +199,11 @@ function do_stats_run($courseid, $start = 0, $end = 0){
     $context = context_course::instance($courseid);
     $students = get_enrolled_users($context, 'mod/assignment:submit', 0, 'u.id');
 
-    if(!$students)
+    if(!$students) {
+        error_log("no students");
+        remove_job_flag($courseid);
         return;
+    }
 
     $statsid = $DB->insert_record('block_meter_stats', $statsrun);
 
@@ -413,6 +416,8 @@ function find_student_activity($courseid, $asc=true){
     $context = context_course::instance($courseid);
     $studentids = get_enrolled_users($context, 'mod/assignment:submit',
         0, 'u.id');
+
+    if(!$studentids) return 0;
 
     if($asc){
         $sql = 'SELECT time FROM '.$CFG->prefix.'log WHERE course='.$courseid.
