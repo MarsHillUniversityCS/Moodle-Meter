@@ -283,7 +283,7 @@ function get_all_student_stats($courseid){
     if(!$students) return array();
     
     foreach($students as $student){
-        $student->level = get_level($student->zscore);
+        $student->level = get_activity_level($student->zscore);
     }
     return $students;
 }
@@ -309,10 +309,10 @@ function get_student_stats($userid, $courseid){
 
     if(!$student) return null;
      
-    return get_level($student->zscore);
+    return get_activity_level($student->zscore);
 }
 
-function get_level($zscore){
+function get_activity_level($zscore){
 
     //New way - level three is from -0.5 to 0.5, etc.
     if($zscore < -1.5)      $level = 1;
