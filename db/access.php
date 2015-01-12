@@ -3,7 +3,6 @@
 /* Define cabilities  (permissions) */
 $capabilities = array(
 
-
     'block/meter:addinstance' => array(
         'riskbitmask' => RISK_SPAM | RISK_XSS,
         'captype' => 'write',

@@ -123,6 +123,12 @@ class block_meter extends block_base {
     function instance_allow_multiple() {
         return false;
     }
+
+    public function applicable_formats() {
+        return array(
+            'course-view'   => true,
+            'my'            => false);
+    }
     
     function has_config() {
         return true;
