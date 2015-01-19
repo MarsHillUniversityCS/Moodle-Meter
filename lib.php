@@ -30,16 +30,19 @@ function calculate_activity_score($userid, $courseid, $start = 0, $end = 0){
     if($end < $start) return 0;
 
     if($start == 0 || $end == 0){
-        $activities = $DB->get_records('log', array('course'=>$courseid, 'userid'=>$userid));
+        $activities = $DB->get_records('logstore_standard_log', 
+            array('courseid'=>$courseid, 'userid'=>$userid));
     } else {
-        $sql = 'SELECT * FROM '.$CFG->prefix.'log WHERE course='.$courseid.
-            ' AND userid='.$userid.' AND time BETWEEN '.$start.' AND '.$end;
+        $sql = 'SELECT * FROM '.$CFG->prefix.'logstore_standard_log WHERE courseid='.$courseid.
+            ' AND userid='.$userid.' AND timecreated BETWEEN '.$start.' AND '.$end;
         //echo $sql;
         $activities = $DB->get_records_sql($sql);
     }
     
-    if(!$activities) 
+    if(!$activities) {
+        //error_log("no activities");
         return 0;
+    }
     
     $score = 0;
     $conf = get_meter_config($courseid);
@@ -51,7 +54,7 @@ function calculate_activity_score($userid, $courseid, $start = 0, $end = 0){
 }
 
 /**
-* @param $activity is a single row from the mdl_log table
+* @param $activity is a single row from the mdl_logstore_standard_log table
 */
 function get_row_score($activity, $config){
 
@@ -65,27 +68,25 @@ function get_row_score($activity, $config){
     $default    = $config['default_weight'];
 
     $score      = 0;
-    if($activity->module=='assign'){
+
+    $eventname = $activity->eventname;
+
+    if(preg_match('/mod_assign|assignsubmission/', $eventname)){
         $score += $tier1;
-    } else if($activity->module=='quiz'){
+    } else if(preg_match('/mod_quiz/', $eventname)){
         $score += $tier2;
-    } else if($activity->module=='resource' || 
-        $activity->module=='page' ||
-        $activity->module=='url' ||
-        $activity->module=='folder'){
+    } else if(preg_match('/mod_(page|url|folder)/', $eventname)){
         $score += $tier3;
-    } else if($activity->module=='forum'){
+    } else if(preg_match('/mod_forum/', $eventname)){
         $score += $tier4;
-    } else if($activity->module=='book' || 
-        $activity->module=='blog' ||
-        $activity->module=='wiki'){ 
+    } else if(preg_match('/mod_(book|blog|wiki)/', $eventname)){
         $score += $tier5;
-    } else if($activity->module=='course' &&
-        preg_match('/^view/i', $activity->action)){ 
+    } else if(preg_match('/course_viewed/', $eventname)){ 
             $score += $tier6;
     } else{
         $score += $default;
     }
+
 
     return $score;
 }
@@ -115,6 +116,35 @@ function remove_job_flag($courseid){
 
 }
 
+/**
+    Deletes all of the config, stats, and studentstats for courseid
+*/
+function delete_all_course_data($courseid){
+
+    global $DB;
+
+    //Find all of the stats runs, and delete the associated
+    //studentstats entries
+    $statsruns = $DB->get_records('block_meter_stats',
+        array('courseid'=>$courseid), '', 'id');
+    
+    if($statsruns){
+        foreach ($statsruns as $stats){
+            $DB->delete_records('block_meter_studentstats',
+                array('statsid'=>$stats->id));
+        }
+    }
+    
+    //then delete the statsrun
+    $DB->delete_records('block_meter_stats',
+        array('courseid'=>$courseid));
+    
+    //delete the config associated with that course
+    $DB->delete_records('block_meter_config',
+        array('courseid'=>$courseid));
+
+}
+
 function do_cron_stats_run($courseid, $start = 0, $end = 0){
     global $CFG, $DB, $COURSE;
 
@@ -131,8 +161,6 @@ function do_cron_stats_run($courseid, $start = 0, $end = 0){
         }
         
         $firstactivity   = find_student_activity($courseid);
-
-
 
         //what if we've skipped a previous day? Need to go back, process it and others
         //until we reach today.
@@ -214,7 +242,6 @@ function do_stats_run($courseid, $start = 0, $end = 0){
         $studentstats->statsid      = $statsid;
         $studentstats->score        = calculate_activity_score($student->id, 
                                         $courseid, $start, $end);
-
         $resultid = $DB->insert_record('block_meter_studentstats', $studentstats);
         if(!$resultid)
             error_log ('Failed to insert student stats for course '.
@@ -420,14 +447,16 @@ function find_student_activity($courseid, $asc=true){
     if(!$studentids) return 0;
 
     if($asc){
-        $sql = 'SELECT time FROM '.$CFG->prefix.'log WHERE course='.$courseid.
+        $sql = 'SELECT timecreated FROM '.$CFG->prefix.'logstore_standard_log WHERE courseid='.$courseid.
             ' AND userid IN ('.implode(',', array_keys($studentids)).')'.
-            ' ORDER BY time ASC LIMIT 1';
+            ' ORDER BY timecreated ASC LIMIT 1';
     } else {
-        $sql = 'SELECT time FROM '.$CFG->prefix.'log WHERE course='.$courseid.
+        $sql = 'SELECT timecreated FROM '.$CFG->prefix.'logstore_standard_log WHERE courseid='.$courseid.
             ' AND userid IN ('.implode(',', array_keys($studentids)).')'.
-            ' ORDER BY time DESC LIMIT 1';
+            ' ORDER BY timecreated DESC LIMIT 1';
     }
+
+    error_log($sql);
 
     $access = $DB->get_record_sql($sql);
     

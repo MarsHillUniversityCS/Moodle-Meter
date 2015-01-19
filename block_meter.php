@@ -62,11 +62,11 @@ class block_meter extends block_base {
         if(has_capability('moodle/grade:viewall', $this->context)){
             $students = get_all_student_stats($COURSE->id);
             if(!$students){
-                $this->content->text .= get_string('noactivitypleasewait', 'block_meter');
+                $this->content->text = get_string('noactivitypleasewait', 'block_meter');
                 return $this->content->text;
             }
 
-            $this->content->text .= get_string('shortleveloverview', 'block_meter');
+            $this->content->text = get_string('shortleveloverview', 'block_meter');
             $this->content->text .= '<br />';
 
 
@@ -108,7 +108,8 @@ class block_meter extends block_base {
             //assume they're avg(3)? Bigger prob here; student doesn't exist.
             if(!$level) $level = 3; 
 
-            $this->content->text .= get_string('level'.$level.'user', 'block_meter');
+
+            $this->content->text = get_string('level'.$level.'user', 'block_meter');
             $this->content->text .= '<br />';
 
             $graphurl->params(array('userid'=>$USER->id));
@@ -192,6 +193,16 @@ class block_meter extends block_base {
                 mtrace('No courses found on which to run activity meter statistics');
             } else {
                 foreach($courses as $course){ 
+
+                    //first - check to see if the course exists in mdl_course
+                    if(!$DB->record_exists('course', array('id'=>$course->courseid))){
+                        //doesn't exist - delete all data for this course and move on
+                        delete_all_course_data($course->courseid);
+                        continue;
+                    }
+ 
+
+
                     //a)    if dostatsrun flag in _config is set, delete the flag, and 
                     //      call a load_historical_data()  
                     //b)    call do_stats_run() or
@@ -282,32 +293,9 @@ class block_meter extends block_base {
 
         //deleting the course removes ALL associated meter data
 
-        //remove the necessary data
-        global $DB;
-
-        //$COURSE->id doesn't work if not deleted from w/in course
         $thiscoursecon = $this->context->get_course_context();
         $courseid = $thiscoursecon->instanceid;
 
-
-        //Find all of the stats runs, and delete the associated
-        //studentstats entries
-        $statsruns = $DB->get_records('block_meter_stats',
-            array('courseid'=>$courseid), '', 'id');
-
-        if($statsruns){
-            foreach ($statsruns as $stats){
-                $DB->delete_records('block_meter_studentstats',
-                    array('statsid'=>$stats->id));
-            }
-        }
-
-        //then delete the statsrun
-        $DB->delete_records('block_meter_stats',
-            array('courseid'=>$courseid));
-
-        //delete the config associated with that course
-        $DB->delete_records('block_meter_config',
-            array('courseid'=>$courseid));
+        delete_all_course_data($courseid);
     }
 }
