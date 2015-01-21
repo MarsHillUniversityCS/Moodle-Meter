@@ -156,7 +156,8 @@ function do_cron_stats_run($courseid, $start = 0, $end = 0){
 
         //don't go further, if there's no activity to process
         if($laststats > $lastactivity){
-            error_log('No activity for course '.$courseid.'. Exiting');
+            error_log('No activity for course '.$courseid.'. Exiting. Laststats: '.
+            $laststats.' and lastactivity: '.$lastactivity);
             return;
         }
         
@@ -169,7 +170,7 @@ function do_cron_stats_run($courseid, $start = 0, $end = 0){
         //must be due to no activity
         if((strtotime('midnight', $now) - 86400) >= $laststats){
         
-            //error_log('There has been more than a day since last stats');
+            error_log('There has been more than a day since last stats');
             $end = strtotime('midnight tomorrow', $laststats);
             if($laststats == 0){
                 $end = $now - 86401; //huh?
@@ -447,16 +448,14 @@ function find_student_activity($courseid, $asc=true){
     if(!$studentids) return 0;
 
     if($asc){
-        $sql = 'SELECT timecreated FROM '.$CFG->prefix.'logstore_standard_log WHERE courseid='.$courseid.
-            ' AND userid IN ('.implode(',', array_keys($studentids)).')'.
+        $sql = 'SELECT timecreated FROM '.$CFG->prefix.'logstore_standard_log WHERE courseid='.
+            $courseid.' AND userid IN ('.implode(',', array_keys($studentids)).')'.
             ' ORDER BY timecreated ASC LIMIT 1';
     } else {
-        $sql = 'SELECT timecreated FROM '.$CFG->prefix.'logstore_standard_log WHERE courseid='.$courseid.
-            ' AND userid IN ('.implode(',', array_keys($studentids)).')'.
+        $sql = 'SELECT timecreated FROM '.$CFG->prefix.'logstore_standard_log WHERE courseid='.
+            $courseid.' AND userid IN ('.implode(',', array_keys($studentids)).')'.
             ' ORDER BY timecreated DESC LIMIT 1';
     }
-
-    error_log($sql);
 
     $access = $DB->get_record_sql($sql);
     
@@ -464,7 +463,7 @@ function find_student_activity($courseid, $asc=true){
         return 0; //nothing to process
     }
     
-    return $access->time;
+    return $access->timecreated;
 
 }
 
