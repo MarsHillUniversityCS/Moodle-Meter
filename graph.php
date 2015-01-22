@@ -30,17 +30,25 @@ require_once('lib.php');
 require_login();
 
 $courseid = required_param('id', PARAM_INT);
-$userid = optional_param('userid', 0, PARAM_INT);
+$userid = optional_param('userid', '0', PARAM_TEXT);
 
 $context = context_course::instance($courseid);
-
+error_log("in graph.php");
 $isteacher = false;
 if (has_capability('moodle/grade:viewall', $context)) { //teacher
     $isteacher = true;
 }
 
+$studentids = urldecode($userid);
+$studentids = explode(',', $studentids);
+error_log("in graph.php: ");
+error_log(print_r($studentids, true));
 
-if(!$isteacher && $userid == 0){
+if(!$isteacher && $sizeof($studentids) > 1){
+    print_error('improper permissions');
+}
+
+if(!$isteacher && $studentids[0] != $USER->id){
     print_error('improper permissions');
 }
 
@@ -96,34 +104,40 @@ $datalist = $array3d[1];  //y-data array of students and their z-scores
 $studentlist = get_enrolled_users($context, 'mod/assignment:submit');
 /**********************************************************************
 **********************************************************************/
-
-if($isteacher && $userid == 0){
+error_log("before check");
+if($isteacher && sizeof($studentids) > 1){
         
     $j = 0;
     foreach ($datalist as $sid=>$data){
-        $chart->y_data[$sid] = $data;
-        $chart->y_format[$sid] = 
-            array('colour' => $colorarray[$j],
-            'line'   => 'brush',
-            'legend' => $studentlist[$sid]->lastname.', '.
-                        $studentlist[$sid]->firstname);
-        $j++;
-        if($j >= sizeof($colorarray)){
-            $j = 0;
+        if(in_array($sid, $studentids)){
+            error_log($sid.' is in the array');
+            $chart->y_data[$sid] = $data;
+            $chart->y_format[$sid] = 
+                array('colour' => $colorarray[$j],
+                'line'   => 'brush',
+                'legend' => $studentlist[$sid]->lastname.', '.
+                            $studentlist[$sid]->firstname);
+            $j++;
+            if($j >= sizeof($colorarray)){
+                $j = 0;
+            }
+        } else {
+            error_log($sid.' is NOT in the array');
         }
+
     }
 
     $chart->y_order = array_keys($datalist);
 } else { //If a student views the graph or teacher views one student
 
     //echo var_dump($ydata);
-    $chart->y_data[1] = $datalist[$userid];
+    $chart->y_data[1] = $datalist[$studentids[0]];
 
     $chart->y_format[1] =
         array('colour' => $colorarray[0],
         'line'   => 'brush',
-        'legend' => $studentlist[$userid]->lastname.', '.
-                    $studentlist[$userid]->firstname);
+        'legend' => $studentlist[$studentids[0]]->lastname.', '.
+                    $studentlist[$studentids[0]]->firstname);
 
     $chart->y_order = array(1);
 }

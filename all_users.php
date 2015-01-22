@@ -24,6 +24,7 @@
  */
 
 require_once(dirname(__FILE__) . '/../../config.php');
+require_once('meter_all_users.php');
 require_once('lib.php');
 
 require_login();
@@ -50,34 +51,47 @@ $PAGE->set_title($strtitle);
 $PAGE->set_heading($strtitle);
 $PAGE->set_pagelayout('course');
 
-echo $OUTPUT->header();
-
 
 $students = get_all_student_stats($courseid);
 
 if(!$students){
+    echo $OUTPUT->header();
     echo get_string('noactivitypleasewait', 'block_meter');
+    echo $OUTPUT->footer();
 } else {
+    
+    //echo get_string('shortleveloverview', 'block_meter');
+    //echo '<br />';
 
-    echo get_string('shortleveloverview', 'block_meter');
-    echo '<br />';
+    $mform = new meter_all_users($students);
 
-    $graphurl = new moodle_url($CFG->wwwroot.'/blocks/meter/user_graph.php',
-        array('id'=>$COURSE->id));
+    if($formdata = $mform->get_data()){
 
-    foreach ($students as $student){
-        $graphurl->params(array('userid'=>$student->userid));
+        $graphurl = new moodle_url($CFG->wwwroot.'/blocks/meter/user_graph.php',
+            array('id'=>$COURSE->id));
 
-        echo
-            html_writer::empty_tag('img', 
-            array('src' => $CFG->wwwroot.'/blocks/meter/pix/level'.
-            $student->level.'circle.png', 'class'=>'icon'));
+        //do something with the data
+        error_log(print_r($formdata, true));
 
-        echo $OUTPUT->action_link($graphurl, $student->lastname.', '.
-            $student->firstname).'<br />';
+        $studentids = array();
+        foreach($formdata->studentid as $sid=>$val){
+            if($val == 1) $studentids[] = $sid;
+        }
+
+        error_log(print_r($studentids, true));
+        $studentidsenc = urlencode(implode(',', $studentids));
+
+        $graphurl->params(array('userid'=>$studentidsenc));
+        redirect($graphurl);
+
+    } else {
+        //show the form
+        echo $OUTPUT->header();
+        $mform->display();
+        echo $OUTPUT->footer();
     }
-$graphurl->remove_params('userid');
-echo '<br /><p>'.  $OUTPUT->action_link($graphurl, 
-    get_string('viewallusers', 'block_meter')).'</p>';
+
+    //$graphurl->remove_params('userid');
+    //echo '<br /><p>'.  $OUTPUT->action_link($graphurl, get_string('viewallusers', 'block_meter')).'</p>';
 }
-echo $OUTPUT->footer();
+

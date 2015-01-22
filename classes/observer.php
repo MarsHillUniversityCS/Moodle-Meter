@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,16 +15,29 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This block will display a summary of hours and earnings for the worker.
+ * Event observer.
  *
- * @package    Block
- * @subpackage Meter
- * @copyright  2014 Carter Benge, Marty Gilbert
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL
+ * @package    block_meter
+ * @copyright  2015 Marty Gilbert
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = '2015012001';
-$plugin->requires  = 2014050900;        // Requires this Moodle version
-$plugin->cron = 86400; // Set min time between cron executions to  1 day
+class block_meter_observer {
+
+    /**
+     * Delete the meter data associated with the newly unenrolled user
+     *
+     * @param \core\event\base $event
+     */
+    public static function user_unenrolled(\core\event\base $event) {
+        global $DB;
+
+        $userenrollment = (object)$event->other['userenrolment'];
+
+        $DB->delete_records('block_meter_studentstats', 
+            array('studentid'=>$userenrollment->userid));
+
+    }
+}

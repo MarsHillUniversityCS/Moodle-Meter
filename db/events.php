@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,16 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This block will display a summary of hours and earnings for the worker.
+ * Event observer.
  *
- * @package    Block
- * @subpackage Meter
- * @copyright  2014 Carter Benge, Marty Gilbert
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL
+ * @package   block_meter
+ * @category  event
+ * @copyright 2015 Marty Gilbert
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = '2015012001';
-$plugin->requires  = 2014050900;        // Requires this Moodle version
-$plugin->cron = 86400; // Set min time between cron executions to  1 day
+$observers = array (
+    array (
+        'eventname' => '\core\event\user_enrolment_deleted',
+        'callback'  => 'block_meter_observer::user_unenrolled',
+        'internal'  => false, // This means that we get events only after transaction commit.
+        'priority'  => 1000,
+    ),
+);

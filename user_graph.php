@@ -28,10 +28,10 @@ require_once('lib.php');
 
 require_login();
 
-global $DB, $CFG, $COURSE;
+global $DB, $CFG, $COURSE, $USER;
 
 $courseid = required_param('id', PARAM_INT);
-$userid = optional_param('userid', 0, PARAM_INT);
+$userid = optional_param('userid', '0', PARAM_TEXT);
 
 $urlparams['id'] = $courseid;
 $urlparams['userid'] = $userid;
@@ -44,11 +44,17 @@ $context = $PAGE->context;
 $isteacher = false;
 if (has_capability('moodle/grade:viewall', $context)) { //teacher
     $isteacher = true;
-    $urlparams['userid'] = 0;
 }
 
+$studentids = urldecode($userid);
+$studentids = explode(',', $studentids);
+error_log(print_r($studentids, true));
 
-if(!$isteacher && $userid == 0){
+if(!$isteacher && $sizeof($studentids) > 1){
+    print_error('improper permissions');
+}
+
+if(!$isteacher && $studentids[0] != $USER->id){
     print_error('improper permissions');
 }
 
@@ -81,9 +87,11 @@ if($statsforcourse && sizeof($statsforcourse) > 2){
 
         echo html_writer::tag('div', $graph, array('class' => 'meter_graph'));
     } else
+        error_log('numRecs is 0');
         echo ("<h3>Not enough student data to produce a graph at this time.</h3>");
 
 } else {
+    error_log('not enough stats');
     echo ("<h3>Not enough student data to produce a graph at this time.</h3>");
 }
 
