@@ -63,6 +63,9 @@ if(!$students){
     //echo get_string('shortleveloverview', 'block_meter');
     //echo '<br />';
 
+    //error_log(print_r($students, true));
+    //error_log("done in all_users");
+    //error_log("**********************");
     $mform = new meter_all_users($students);
 
     if($formdata = $mform->get_data()){
@@ -71,14 +74,14 @@ if(!$students){
             array('id'=>$COURSE->id));
 
         //do something with the data
-        error_log(print_r($formdata, true));
+        //error_log(print_r($formdata, true));
 
         $studentids = array();
         foreach($formdata->studentid as $sid=>$val){
             if($val == 1) $studentids[] = $sid;
         }
 
-        error_log(print_r($studentids, true));
+        //error_log(print_r($studentids, true));
         $studentidsenc = urlencode(implode(',', $studentids));
 
         $graphurl->params(array('userid'=>$studentidsenc));

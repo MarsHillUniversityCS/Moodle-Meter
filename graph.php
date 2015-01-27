@@ -33,7 +33,6 @@ $courseid = required_param('id', PARAM_INT);
 $userid = optional_param('userid', '0', PARAM_TEXT);
 
 $context = context_course::instance($courseid);
-error_log("in graph.php");
 $isteacher = false;
 if (has_capability('moodle/grade:viewall', $context)) { //teacher
     $isteacher = true;
@@ -41,8 +40,6 @@ if (has_capability('moodle/grade:viewall', $context)) { //teacher
 
 $studentids = urldecode($userid);
 $studentids = explode(',', $studentids);
-error_log("in graph.php: ");
-error_log(print_r($studentids, true));
 
 if(!$isteacher && $sizeof($studentids) > 1){
     print_error('improper permissions');
@@ -53,6 +50,7 @@ if(!$isteacher && $studentids[0] != $USER->id){
 }
 
 $chart = new graph(1324,768);
+//$chart = new graph(1024,600);
 $chart->parameter['title'] = 'Moodle Activity Statistics';
 $chart->parameter['x_label'] = 'Date';
 $chart->parameter['y_label_left'] = 'Z-Score';
@@ -75,12 +73,24 @@ $chart->colour['plum']      = ImageColorAllocate($chart->image, 0xDD, 0xA0, 0xDD
 $chart->colour['sienna']    = ImageColorAllocate($chart->image, 0xA0, 0x52, 0x2D);    
 /* End of extra colors */
 
+$colorarray = array('blue', 'red', 'green', 'orange',
+    'pink', 'lime', 'navy', 'crimson',
+    'cyan', 'steelblue', 'darkkhaki', 'gray',
+    'maroon', 'goldenrod', 'lawngreen', 'teal',
+    'fuchsia', 'olive', 'sienna', 'purple');
+/*
+Not used:
+ltblue, gold, seagreen, indigo, magenta, plum,
+pink, yellow
+*/
+/*
 $colorarray = array('blue', 'crimson', 'gold', 'green', 
     'red', 'goldenrod', 'purple', 'lawngreen', 'teal',
     'cyan', 'seagreen', 'steelblue', 'darkkhaki', 'gray', 
     'ltblue', 'navy', 'indigo', 'magenta', 'plum', 'sienna', 
     'maroon', 'olive', 'fuchsia', 'pink', 'lime', 'yellow', 'ltgreen',
     'orange');
+*/
 
     
     
@@ -104,14 +114,15 @@ $datalist = $array3d[1];  //y-data array of students and their z-scores
 $studentlist = get_enrolled_users($context, 'mod/assignment:submit');
 /**********************************************************************
 **********************************************************************/
-error_log("before check");
+//error_log("before check");
 if($isteacher && sizeof($studentids) > 1){
         
     $j = 0;
     foreach ($datalist as $sid=>$data){
         if(in_array($sid, $studentids)){
-            error_log($sid.' is in the array');
+            //error_log($sid.' is in the array');
             $chart->y_data[$sid] = $data;
+            //error_log(print_r($data,true));
             $chart->y_format[$sid] = 
                 array('colour' => $colorarray[$j],
                 'line'   => 'brush',
@@ -121,13 +132,16 @@ if($isteacher && sizeof($studentids) > 1){
             if($j >= sizeof($colorarray)){
                 $j = 0;
             }
-        } else {
-            error_log($sid.' is NOT in the array');
+        //} else {
+            //error_log($sid.' is NOT in the array');
         }
 
     }
+    //$chart->y_order = array_keys($studentids);
+    $chart->y_order = $studentids;
 
-    $chart->y_order = array_keys($datalist);
+    //error_log(sizeof($chart->y_data));
+    //error_log(sizeof($chart->y_order));
 } else { //If a student views the graph or teacher views one student
 
     //echo var_dump($ydata);
@@ -177,9 +191,9 @@ $chart->parameter['grid_colour']        =  'grayDD';
 //$chart->parameter['x_ticks_colour']   = 'none'; // no x ticks (colour = 'none') 
 $chart->parameter['x_axis_gridlines']   = 'auto'; // no x ticks (colour = 'none') 
 
-$chart->parameter['legend']           = 'outside-top';
-$chart->parameter['legend_border']    = 'black';
-$chart->parameter['legend_size']    = 11;
+$chart->parameter['legend']             = 'outside-top';
+$chart->parameter['legend_border']      = 'black';
+$chart->parameter['legend_size']        = 10;
 
 // draw it.
 $chart->draw();

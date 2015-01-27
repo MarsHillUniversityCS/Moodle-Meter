@@ -31,7 +31,7 @@ require_login();
 global $DB, $CFG, $COURSE, $USER;
 
 $courseid = required_param('id', PARAM_INT);
-$userid = optional_param('userid', '0', PARAM_TEXT);
+$userid = required_param('userid', PARAM_TEXT); //urlencoded csv of ids
 
 $urlparams['id'] = $courseid;
 $urlparams['userid'] = $userid;
@@ -48,7 +48,7 @@ if (has_capability('moodle/grade:viewall', $context)) { //teacher
 
 $studentids = urldecode($userid);
 $studentids = explode(',', $studentids);
-error_log(print_r($studentids, true));
+//error_log(print_r($studentids, true));
 
 if(!$isteacher && $sizeof($studentids) > 1){
     print_error('improper permissions');
@@ -73,7 +73,8 @@ echo $OUTPUT->header();
 $statsforcourse = $DB->get_records('block_meter_stats',
     array('courseid'=>$COURSE->id), '', 'id');
 
-if($statsforcourse && sizeof($statsforcourse) > 2){
+//error_log(sizeof($statsforcourse));
+if($statsforcourse && sizeof($statsforcourse) > 1){
 
     $numRecs = $DB->count_records_select('block_meter_studentstats',
         'statsid in ('.implode(',', array_keys($statsforcourse)).')');
@@ -87,11 +88,11 @@ if($statsforcourse && sizeof($statsforcourse) > 2){
 
         echo html_writer::tag('div', $graph, array('class' => 'meter_graph'));
     } else
-        error_log('numRecs is 0');
+        //error_log('numRecs is 0');
         echo ("<h3>Not enough student data to produce a graph at this time.</h3>");
 
 } else {
-    error_log('not enough stats');
+    //error_log('not enough stats');
     echo ("<h3>Not enough student data to produce a graph at this time.</h3>");
 }
 

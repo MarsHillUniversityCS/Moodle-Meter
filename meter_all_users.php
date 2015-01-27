@@ -40,26 +40,45 @@ class meter_all_users extends moodleform {
         $mform->addElement('hidden', 'id', $COURSE->id);
         $mform->setType('id', PARAM_INT);
 
-        $mform->addElement('header', 'general', 'All students');
+        $mform->addElement('header', 'general', 'View activity graph');
 
+        $mform->addElement('html',
+            '<div style="margin-left: 10px"><h3>Select up to 20 students for graph</h3></div>');
         $graphurl = new moodle_url($CFG->wwwroot.'/blocks/meter/user_graph.php',
             array('id'=>$COURSE->id));
 
         $this->add_checkbox_controller(1);
-        //$mform->addElement('html', '<table><tr><th width="5%">Select</th><th>Student</th></tr>');
+        //$mform->addElement('html', '<table><tbody>'.  '<tr><th>Student</th></tr>');
+
+        //? This is stupid. I hate CSS/HTML. 
+        $mform->addElement('html', '<style type="text/css">
+            .form-item .form-label, .mform .fitem div.fitemtitle { 
+                width: 0px; 
+            }
+            .form-item, .mform .fitem {
+                margin-bottom: -1px;
+            }
+            </style>');
+
         foreach ($this->students as $student){
             $graphurl->params(array('userid'=>$student->userid));
 
-            $desc = ' '.html_writer::empty_tag('img', 
-                array('src' => $CFG->wwwroot.'/blocks/meter/pix/level'.
-                $student->level.'circle.png', 'class'=>'icon')).' '.
+            $desc = 
                 $OUTPUT->action_link($graphurl, $student->lastname.', '.
                 $student->firstname);
 
-            $mform->addElement('advcheckbox', 
-                'studentid'.'['.$student->id.']','', $desc, array('group'=>1));
+            $img = 
+                html_writer::empty_tag('img', 
+                array('src' => $CFG->wwwroot.'/blocks/meter/pix/level'.
+                $student->level.'circle.png', 'class'=>'icon'));
 
+            //$mform->addElement('html', '<tr><td>');
+            $mform->addElement('advcheckbox', 
+                'studentid'.'['.$student->userid.']', null, $img.$desc, array('group'=>1));
+            //error_log(print_r($student, true));
+            //$mform->addElement('html', '</td></tr>');
         }
+        //$mform->addElement('html', '</tbody></table>');
 
         $buttonarray=array();
         $buttonarray[] =
@@ -69,8 +88,8 @@ class meter_all_users extends moodleform {
     }
 
     function validation($data, $files){
-        error_log("in validation. sizeof is: ".sizeof($data['studentid']));
-        error_log(print_r($data['studentid'], true));
+        //error_log("in validation. sizeof is: ".sizeof($data['studentid']));
+        //error_log(print_r($data['studentid'], true));
         $errors = array();
         if(sizeof($data['studentid']) == 0) return $errors;
 
@@ -84,16 +103,16 @@ class meter_all_users extends moodleform {
         //hack, because I have no normal elements to attach the error to
         $key = 'studentid['.$key.']';
 
-        error_log("count is $count");
+        //error_log("count is $count");
 
         if($count > 20){
-            $errors[$key] = 'Select no more than 20 students';
+            $errors[$key] = 'You must deselect '.($count - 20).' students';
         } else if ($count < 1) {
-            error_log("must be at least 1");
+            //error_log("must be at least 1");
             $errors[$key] = 'Must select at least 1 student';
         }
 
-        error_log(print_r($errors, true));
+        //error_log(print_r($errors, true));
 
         return $errors;
     }

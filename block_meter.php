@@ -49,7 +49,7 @@ class block_meter extends block_base {
 
             //why not just set the default config from global? TODO
 
-            $this->content->text .= 
+            $this->content->text = 
                 get_string('noconfigpresent', 'block_meter');
             
 
@@ -83,23 +83,21 @@ class block_meter extends block_base {
                     $student->lastname.', '.$student->firstname).'<br />';
 
                 $count++;
-                if($count >= 20){ //don't show an exhaustive list
+                if($count >= 15){ //don't show an exhaustive list
 
                     $moreurl = new moodle_url($CFG->wwwroot.
                         '/blocks/meter/all_users.php',
                         array('id'=>$COURSE->id));
 
-                    $this->content->text .= 
-                        $OUTPUT->action_link($moreurl, 
-                            get_string('viewall', 'block_meter')).'<br />';
+                    $this->content->text .= $OUTPUT->action_link($moreurl, 'More...');
                     break;
                 }
             }
 
             $graphurl->remove_params('userid');
             $this->content->text .= '<br /><p style="text-align: right;">'.
-                $OUTPUT->action_link($graphurl, 
-                get_string('viewallusers', 'block_meter')).'</p>';
+                $OUTPUT->action_link($moreurl, 
+                'View composite graph</p>');
 
         } else if(has_capability('mod/assignment:submit', $this->context)){
 
