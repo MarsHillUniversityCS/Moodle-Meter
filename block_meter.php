@@ -71,6 +71,9 @@ class block_meter extends block_base {
 
 
             $count = 0;
+            $moreurl = new moodle_url($CFG->wwwroot.'/blocks/meter/all_users.php',
+                array('id'=>$COURSE->id));
+
             foreach ($students as $student){
                 $graphurl->params(array('userid'=>$student->userid));
 
@@ -85,9 +88,6 @@ class block_meter extends block_base {
                 $count++;
                 if($count >= 15){ //don't show an exhaustive list
 
-                    $moreurl = new moodle_url($CFG->wwwroot.
-                        '/blocks/meter/all_users.php',
-                        array('id'=>$COURSE->id));
 
                     $this->content->text .= $OUTPUT->action_link($moreurl, 'More...');
                     break;
