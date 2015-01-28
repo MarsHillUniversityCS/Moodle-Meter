@@ -22,8 +22,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Meter';
-$string['blocktitle'] = 'Moodle Meter';
+$string['pluginname']   = 'Meter';
+$string['blocktitle']   = 'Moodle Meter';
+$string['crontask']     = 'Calculate daily Moodle Meter statistics';
 
 //Capabilities - descriptive names. Setup in db/access.php
 $string['meter:addinstance'] = 'Add meter to course';

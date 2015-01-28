@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,16 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This block will display a summary of hours and earnings for the worker.
+ * Definition of Moodle Meter scheduled tasks.
  *
- * @package    Block
- * @subpackage Meter
- * @copyright  2014 Carter Benge, Marty Gilbert
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL
+ * @package   block_meter
+ * @category  task
+ * @copyright 2015 Marty Gilbert <martygilbert@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = '2015012702';
-$plugin->requires  = 2014050900;        // Requires this Moodle version
-$plugin->cron = 86400; // Set min time between cron executions to  1 day
+$tasks = array(
+    array(
+        'classname' => 'block_meter\task\meter_do_stats_task',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => '*',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*'
+    )
+);
+
