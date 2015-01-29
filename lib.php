@@ -554,8 +554,17 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
 function meter_cron(){
     global $CFG, $DB; 
 
+    /*
+    if(!isset($CFG->meterlastcron)){
+        mtrace('CFG->lastcron not set. initializing');
+        set_config('meterlastcron', 0);
+    }
+    */
+
+
     $lastcron = $DB->get_field('block', 'lastcron', 
         array('name'=>'meter'));
+    //$lastcron = $CFG->meterlastcron;
 
     $suffix='am';
     $cronhourdisp = $CFG->block_meter_cronhour;
@@ -563,6 +572,7 @@ function meter_cron(){
     if($cronhourdisp > 12) $suffix='pm';
     $cronhourdisp .= $suffix;
     if($lastcron == 0){ //first time
+        mtrace('lastcron is 0. Setting to yesterday');
         $lastcron = strtotime ('Yesterday '.$cronhourdisp);
     }
 
@@ -645,13 +655,14 @@ function meter_cron(){
                 }
             }
         }
+        mtrace('Updating lastcron: '.strtotime('Today '.$cronhourdisp));
+        //update lastcron
+        $DB->set_field('block', 'lastcron', strtotime('Today '.$cronhourdisp),
+            array('name'=>'meter'));
     } else {
         mtrace('NOT TIME FOR METER CRON!');
     }
 
-    //update lastcron
-    $DB->set_field('block', 'lastcron', strtotime('Today '.$cronhourdisp),
-        array('name'=>'meter'));
 
     //remove lock
     $DB->delete_records('block_meter_config', 
