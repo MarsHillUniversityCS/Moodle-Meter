@@ -49,6 +49,16 @@ if(!$isteacher && $studentids[0] != $USER->id){
     print_error('improper permissions');
 }
 
+/* Add this event to the log */
+$event = \block_meter\event\graph_viewed::create(array(
+    'context'=>$context,
+    'other'=>array(
+        'courseid'=>$courseid,
+        'userids'=>$userid
+    )
+));
+$event->trigger();
+
 $chart = new graph(1324,768);
 //$chart = new graph(1024,600);
 $chart->parameter['title'] = 'Moodle Activity Statistics';
