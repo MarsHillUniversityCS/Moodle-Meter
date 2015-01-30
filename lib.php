@@ -581,11 +581,11 @@ function meter_cron(){
     $crontime = usergetmidnight($timenow, $CFG->timezone) +
         ($CFG->block_meter_cronhour * 3600);
 
-    mtrace('METER: crontime: '.$crontime);
-    mtrace('METER: timenow: '.$timenow);
-    mtrace('METER: lastcron: '.$lastcron);
+    //mtrace('METER: crontime: '.$crontime);
+    //mtrace('METER: timenow: '.$timenow);
+    //mtrace('METER: lastcron: '.$lastcron);
     if($lastcron < $crontime and $timenow > $crontime){
-        mtrace('TIME FOR METER CRON! '.$timenow);
+        //mtrace('TIME FOR METER CRON! '.$timenow);
         $lock = $DB->get_record('block_meter_config',
             array('courseid'=>-1, 'name'=>'lock'));
 
@@ -655,12 +655,12 @@ function meter_cron(){
                 }
             }
         }
-        mtrace('Updating lastcron: '.strtotime('Today '.$cronhourdisp));
+        //mtrace('Updating lastcron: '.strtotime('Today '.$cronhourdisp));
         //update lastcron
         $DB->set_field('block', 'lastcron', strtotime('Today '.$cronhourdisp),
             array('name'=>'meter'));
-    } else {
-        mtrace('NOT TIME FOR METER CRON!');
+    //} else {
+        //mtrace('NOT TIME FOR METER CRON!');
     }
 
 
