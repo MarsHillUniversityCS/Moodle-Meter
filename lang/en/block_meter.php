@@ -26,6 +26,7 @@ $string['pluginname']   = 'Meter';
 $string['blocktitle']   = 'Moodle Meter';
 $string['crontask']     = 'Calculate daily Moodle Meter statistics';
 
+//For logging when user's view a Meter graph
 $string['eventgraph_viewed'] = 'User has viewed a graph';
 
 //Capabilities - descriptive names. Setup in db/access.php
