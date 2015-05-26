@@ -138,9 +138,35 @@ class block_meter extends block_base {
     }
 
     /**
+    * Override the instance_create in block_base
+    */
+    function instance_create(){
+        //global $COURSE    
+
+        $data = new stdClass();
+        $globalconf = get_global_config();
+
+        //load defaults weights
+        foreach(range(1,6) as $i){
+            if(!isset($config['tier'.$i.'_weight'])){
+                $prop = 'tier'.$i.'_weight';
+                $data->$prop = $globalconf['tier'.$i.'_weight'];
+            }
+        }
+    
+        if(!isset($config['default_weight']))
+            $data->default_weight = $globalconf['default_weight'];
+
+        //error_log(print_r($data, true));
+        $this->instance_config_save($data); 
+        return parent::instance_create();
+    }
+
+    /**
     * Override the instance_config_save method
     */
     function instance_config_save($data, $nolongerused = false){
+        error_log(print_r($data, true));
         parent::instance_config_save($data, $nolongerused);
 
         global $DB, $COURSE;
