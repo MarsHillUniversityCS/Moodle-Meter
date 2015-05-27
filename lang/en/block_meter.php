@@ -25,6 +25,7 @@
 $string['pluginname']   = 'Meter';
 $string['blocktitle']   = 'Moodle Meter';
 $string['crontask']     = 'Calculate daily Moodle Meter statistics';
+$string['historicaladhoc']     = 'Calculate historical stats for a course';
 
 //For logging when user's view a Meter graph
 $string['eventgraph_viewed'] = 'User has viewed a graph';
@@ -51,7 +52,7 @@ $string['defaultweightdesc']    = 'Weight for any log activity for a course othe
 listed categories.';
 
 $string['configchanged']    = '**If you change the category weights, the statistics will
-need to re-calculate with the new settings. This process may take several minutes.';
+need to re-calculate with the new settings. The new values may not show up for several minutes.';
 $string['noconfigpresent']  = 'Please configure the Meter block before use. <br />
                             To do this, simply:
                             <ol>

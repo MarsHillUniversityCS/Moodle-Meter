@@ -488,12 +488,32 @@ function find_last_stats_run($courseid){
     return $access->statstime;
 }
 
-
 /**
 * Processes all data from $start - $final, processing one day at a time
 */
 function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = false){
+    global $CFG;
+
+    require_once($CFG->dirroot . '/blocks/meter/classes/task/meter_do_historical_stats_task.php');
+
+    $loadhist = new \block_meter\task\meter_do_historical_stats_task();
+
+    $loadhist->set_custom_data(array(
+        'courseid'=>$courseid,
+        'start'=>$start,
+        'final'=>$final,
+        'deleteprev'=>$deleteprev));
+
+    \core\task\manager::queue_adhoc_task($loadhist);
+}
+
+
+/**
+* Processes all data from $start - $final, processing one day at a time
+*/
+function cron_load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = false){
     global $CFG, $DB; 
+
     if($deleteprev){
         //what if the data isn't there?
 
@@ -541,13 +561,6 @@ function load_historical_data($courseid, $start = 0, $final = 0, $deleteprev = f
         do_stats_run($courseid, $start, $end); 
     
         $end = strtotime("+1 day", $end); 
-
-        //debug only
-        /*
-        $format = '%m/%d/%y';
-        error_log( "Processed from ".
-            userdate($start, $format).' to '.userdate($end, $format)."\n");
-        */
     }
 
 }

@@ -157,7 +157,6 @@ class block_meter extends block_base {
         if(!isset($config['default_weight']))
             $data->default_weight = $globalconf['default_weight'];
 
-        //error_log(print_r($data, true));
         $this->instance_config_save($data); 
         return parent::instance_create();
     }
@@ -166,7 +165,6 @@ class block_meter extends block_base {
     * Override the instance_config_save method
     */
     function instance_config_save($data, $nolongerused = false){
-        error_log(print_r($data, true));
         parent::instance_config_save($data, $nolongerused);
 
         global $DB, $COURSE;
@@ -186,14 +184,10 @@ class block_meter extends block_base {
             if($rec){
                 $conf->id = $rec->id;
                 if($config[$conf->name] != $conf->value) $hasChanged = true;
-                //error_log("Updating existing record");
                 $DB->update_record('block_meter_config', $conf);
             } else {
                 $hasChanged = true;
-                //error_log("inserting new record");
-                //error_log(print_r($conf, true));
                 $result = $DB->insert_record('block_meter_config', $conf);
-                //error_log("result from insert is $result");
             }
 
         }
@@ -203,9 +197,6 @@ class block_meter extends block_base {
         //load_historical_data() if it's the first time.
         //only load_historical_data if config values have changed.
         if($hasChanged){
-            error_log("Meter: Config has changed for course ".$COURSE->id.
-                " - running load_historical_data()");
-
             load_historical_data($COURSE->id, 0, 0, true);
         }
 
