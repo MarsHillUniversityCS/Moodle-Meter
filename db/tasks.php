@@ -29,8 +29,8 @@ $tasks = array(
     array(
         'classname' => 'block_meter\task\meter_do_stats_task',
         'blocking' => 0,
-        'minute' => '0',
-        'hour' => '*',
+        'minute' => '42',
+        'hour' => '3',
         'day' => '*',
         'month' => '*',
         'dayofweek' => '*'
