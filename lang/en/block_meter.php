@@ -62,9 +62,6 @@ $string['noconfigpresent']  = 'Please configure the Meter block before use. <br 
                             </ol>';
 
 //admin config
-$string['cronhour']     = 'Hour to calculate statistics'; 
-$string['cronhourdesc'] = 'The hour when the activity meter statistics should be calculated. This is an intensive process, and should be set to a time when the server load is minimal.';
-
 
 //Graph
 $string['viewgraph']    = 'View your activity graph';

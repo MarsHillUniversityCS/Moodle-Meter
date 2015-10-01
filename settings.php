@@ -9,12 +9,6 @@ if ($ADMIN->fulltree) {
         $options[$i] = sprintf("%02d",$i);
     }
 
-    $settings->add(
-        new admin_setting_configselect('block_meter_cronhour', 
-        get_string('cronhour', 'block_meter'),
-        get_string('cronhourdesc', 'block_meter'), 4, $options));
-
-
     foreach(range(1,6) as $i){
         $settings->add(
             new admin_setting_configtext('block_meter_tier'.$i.'_weight', 
