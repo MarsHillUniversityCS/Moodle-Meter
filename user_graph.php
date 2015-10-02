@@ -50,7 +50,7 @@ $studentids = urldecode($userid);
 $studentids = explode(',', $studentids);
 //error_log(print_r($studentids, true));
 
-if(!$isteacher && $sizeof($studentids) > 1){
+if(!$isteacher && sizeof($studentids) > 1){
     print_error('improper permissions');
 }
 
