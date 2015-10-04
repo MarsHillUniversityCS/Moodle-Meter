@@ -26,6 +26,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = '2015100401';
+$plugin->version = '2015100429';
 $plugin->requires  = 2015051100.03;        // Requires this Moodle version
 $plugin->cron = 86400; // Set min time between cron executions to  1 day
