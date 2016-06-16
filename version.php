@@ -28,4 +28,5 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->version = '2015100427';
 $plugin->requires  = 2014050900;        // Requires this Moodle version
+$plugin->component = 'block_meter';      // Full name of the plugin (used for diagnostics)
 $plugin->cron = 86400; // Set min time between cron executions to  1 day
