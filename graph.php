@@ -41,7 +41,7 @@ if (has_capability('moodle/grade:viewall', $context)) { //teacher
 $studentids = urldecode($userid);
 $studentids = explode(',', $studentids);
 
-if(!$isteacher && $sizeof($studentids) > 1){
+if(!$isteacher && sizeof($studentids) > 1){
     print_error('improper permissions');
 }
 
